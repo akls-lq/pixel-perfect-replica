@@ -14,7 +14,10 @@ export const Route = createFileRoute("/conditions")({
   }),
   component: () => (
     <PageShell title="Conditions d'utilisation" intro="Document en cours de rédaction.">
-      <p>Cretoria est actuellement un prototype. Aucune candidature n'est envoyée sans ton autorisation explicite.</p>
+      <p>
+        Cretoria est actuellement un prototype. Aucune candidature n'est envoyée sans ton
+        autorisation explicite.
+      </p>
     </PageShell>
   ),
 });

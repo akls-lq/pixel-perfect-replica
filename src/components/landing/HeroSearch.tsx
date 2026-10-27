@@ -22,21 +22,42 @@ export function HeroSearch({ onSearch }: { onSearch: (s: SearchState) => void })
       <label className={field}>
         <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
         <span className="sr-only">Métier ou mot-clé</span>
-        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Métier, compétence…" className="w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm" />
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Métier, compétence…"
+          className="w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm"
+        />
       </label>
       <label className={field}>
         <MapPin className="h-4 w-4 shrink-0 text-muted-foreground" />
         <span className="sr-only">Localisation</span>
-        <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="Ville" className="w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm" />
+        <input
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          placeholder="Ville"
+          className="w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm"
+        />
       </label>
       <label className={field}>
         <Briefcase className="h-4 w-4 shrink-0 text-muted-foreground" />
         <span className="sr-only">Type de contrat</span>
-        <select value={contract} onChange={(e) => setContract(e.target.value)} className="w-full min-w-0 bg-transparent text-base outline-none md:text-sm">
-          {contracts.map((c) => <option key={c} value={c}>{c === "Tous" ? "Tous contrats" : c}</option>)}
+        <select
+          value={contract}
+          onChange={(e) => setContract(e.target.value)}
+          className="w-full min-w-0 bg-transparent text-base outline-none md:text-sm"
+        >
+          {contracts.map((c) => (
+            <option key={c} value={c}>
+              {c === "Tous" ? "Tous contrats" : c}
+            </option>
+          ))}
         </select>
       </label>
-      <button type="submit" className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">
+      <button
+        type="submit"
+        className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+      >
         Rechercher
       </button>
     </form>

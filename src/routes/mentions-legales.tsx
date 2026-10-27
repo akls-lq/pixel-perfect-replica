@@ -13,7 +13,10 @@ export const Route = createFileRoute("/mentions-legales")({
     ],
   }),
   component: () => (
-    <PageShell title="Mentions légales" intro="Les informations sur l'éditeur et l'hébergeur seront publiées avant le lancement.">
+    <PageShell
+      title="Mentions légales"
+      intro="Les informations sur l'éditeur et l'hébergeur seront publiées avant le lancement."
+    >
       <p className="text-muted-foreground">Éditeur : à compléter. Hébergement : à compléter.</p>
     </PageShell>
   ),

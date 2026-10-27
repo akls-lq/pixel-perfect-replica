@@ -6,7 +6,11 @@ export const Route = createFileRoute("/faq")({
   head: () => ({
     meta: [
       { title: "FAQ — Cretoria" },
-      { name: "description", content: "Réponses aux questions fréquentes sur Cretoria : Autopilot, IA, données et confidentialité." },
+      {
+        name: "description",
+        content:
+          "Réponses aux questions fréquentes sur Cretoria : Autopilot, IA, données et confidentialité.",
+      },
       { property: "og:title", content: "FAQ — Cretoria" },
       { property: "og:description", content: "Tout savoir sur le fonctionnement de Cretoria." },
       { property: "og:type", content: "website" },

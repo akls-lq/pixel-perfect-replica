@@ -14,8 +14,14 @@ export const Route = createFileRoute("/confidentialite")({
   }),
   component: () => (
     <PageShell title="Confidentialité" intro="Document en cours de rédaction.">
-      <p>Cretoria applique un traitement minimal des données personnelles. Tes documents privés ne sont accessibles qu'à toi.</p>
-      <p>Aucun mot de passe de plateforme tierce n'est collecté. Tu peux exporter ou supprimer tes données à tout moment depuis tes paramètres.</p>
+      <p>
+        Cretoria applique un traitement minimal des données personnelles. Tes documents privés ne
+        sont accessibles qu'à toi.
+      </p>
+      <p>
+        Aucun mot de passe de plateforme tierce n'est collecté. Tu peux exporter ou supprimer tes
+        données à tout moment depuis tes paramètres.
+      </p>
     </PageShell>
   ),
 });

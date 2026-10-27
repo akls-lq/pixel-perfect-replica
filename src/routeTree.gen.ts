@@ -16,6 +16,7 @@ import { Route as ContactRouteImport } from './routes/contact'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as TarifsRouteImport } from './routes/tarifs'
+import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -52,6 +53,11 @@ const TarifsRoute = TarifsRouteImport.update({
   path: '/tarifs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/app/dashboard',
+  path: '/app/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/faq': typeof FaqRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/tarifs': typeof TarifsRoute
+  '/app/dashboard': typeof AppDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/faq': typeof FaqRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/tarifs': typeof TarifsRoute
+  '/app/dashboard': typeof AppDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/faq': typeof FaqRoute
   '/mentions-legales': typeof MentionsLegalesRoute
   '/tarifs': typeof TarifsRoute
+  '/app/dashboard': typeof AppDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/mentions-legales'
     | '/tarifs'
+    | '/app/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/mentions-legales'
     | '/tarifs'
+    | '/app/dashboard'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/faq'
     | '/mentions-legales'
     | '/tarifs'
+    | '/app/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   FaqRoute: typeof FaqRoute
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   TarifsRoute: typeof TarifsRoute
+  AppDashboardRoute: typeof AppDashboardRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -172,6 +185,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TarifsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/dashboard': {
+      id: '/app/dashboard'
+      path: '/app/dashboard'
+      fullPath: '/app/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   FaqRoute: FaqRoute,
   MentionsLegalesRoute: MentionsLegalesRoute,
   TarifsRoute: TarifsRoute,
+  AppDashboardRoute: AppDashboardRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
