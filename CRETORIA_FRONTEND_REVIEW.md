@@ -69,3 +69,4 @@ Les polices Google sont bloquées dans ce réseau : les captures utilisent la po
 ## Prévisualisation
 
 Développement depuis le dépôt : `npm run dev -- --host 0.0.0.0 --port 3000`. Le projet conserve `vercel.json` et son build Nitro/Vercel ; la branche de revue est `feat/cretoria-v2`. L’offre actuelle Vercel peut bloquer un commit dont l’auteur n’a pas accès au projet. Aucun changement de plan, de droits ou d’identité Git n’est effectué pour contourner ce contrôle.
+Nouvelle refonte prête pour ma revue visuelle sur Vercel.
