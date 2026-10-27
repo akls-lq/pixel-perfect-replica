@@ -3,11 +3,11 @@ import { Menu, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 const nav = [
-  { hash: "offres", label: "Offres" },
-  { hash: "autopilot", label: "Autopilot" },
-  { hash: "cv-studio", label: "CV Studio" },
-  { hash: "suivi", label: "Suivi" },
-  { hash: "progression", label: "Progression" },
+  { to: "/", label: "Accueil" },
+  { to: "/app/offers", label: "Offres" },
+  { to: "/app/cv-studio", label: "CV Studio" },
+  { to: "/app/applications", label: "Suivi" },
+  { to: "/app/accounts", label: "Comptes employeurs" },
 ] as const;
 
 export function Logo({ light = false }: { light?: boolean }) {
@@ -31,7 +31,7 @@ export function SiteHeader() {
   const links = (
     <>
       {nav.map((n) => (
-        <Link key={n.hash} to="/" hash={n.hash} onClick={() => setOpen(false)} className={linkCls}>
+        <Link key={n.to} to={n.to} onClick={() => setOpen(false)} className={linkCls}>
           {n.label}
         </Link>
       ))}
@@ -52,7 +52,7 @@ export function SiteHeader() {
         </nav>
         <div className="hidden items-center gap-2 lg:flex">
           <Link
-            to="/app/dashboard"
+            to="/"
             className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             Explorer la démo
@@ -74,7 +74,7 @@ export function SiteHeader() {
         >
           {links}
           <Link
-            to="/app/dashboard"
+            to="/"
             onClick={() => setOpen(false)}
             className="mt-2 rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-semibold text-primary-foreground"
           >

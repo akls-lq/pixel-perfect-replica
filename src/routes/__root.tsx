@@ -1,3 +1,4 @@
+import { WorkspaceProvider } from "@/components/workspace/WorkspaceContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Outlet,
@@ -122,8 +123,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      {/* Required: nested routes render here. Removing <WorkspaceProvider><Outlet /></WorkspaceProvider> breaks all child routes. */}
+      <WorkspaceProvider>
+        <Outlet />
+      </WorkspaceProvider>
     </QueryClientProvider>
   );
 }
