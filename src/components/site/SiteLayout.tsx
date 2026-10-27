@@ -3,15 +3,17 @@ import { Menu, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 const nav = [
-  { to: "/", hash: "produit", label: "Produit" },
-  { to: "/", hash: "fonctionnalites", label: "Fonctionnalités" },
-  { to: "/", hash: "etapes", label: "Comment ça marche" },
+  { hash: "offres", label: "Offres" },
+  { hash: "autopilot", label: "Autopilot" },
+  { hash: "cv-studio", label: "CV Studio" },
+  { hash: "suivi", label: "Suivi" },
+  { hash: "progression", label: "Progression" },
 ] as const;
 
-export function Logo() {
+export function Logo({ light = false }: { light?: boolean }) {
   return (
-    <Link to="/" className="flex items-center gap-2 font-display text-2xl">
-      <span className="grid h-8 w-8 place-items-center rounded-lg bg-accent text-accent-foreground font-sans text-sm font-bold">C</span>
+    <Link to="/" className={`flex items-center gap-2 text-lg font-extrabold tracking-tight ${light ? "text-ink-foreground" : "text-foreground"}`}>
+      <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground">C</span>
       Cretoria
     </Link>
   );
@@ -19,32 +21,36 @@ export function Logo() {
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const linkCls = "rounded-md px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground";
   const links = (
     <>
       {nav.map((n) => (
-        <Link key={n.label} to={n.to} hash={n.hash} onClick={() => setOpen(false)} className="text-sm text-muted-foreground hover:text-foreground">
-          {n.label}
-        </Link>
+        <Link key={n.hash} to="/" hash={n.hash} onClick={() => setOpen(false)} className={linkCls}>{n.label}</Link>
       ))}
-      <Link to="/tarifs" onClick={() => setOpen(false)} className="text-sm text-muted-foreground hover:text-foreground">Tarifs</Link>
-      <Link to="/faq" onClick={() => setOpen(false)} className="text-sm text-muted-foreground hover:text-foreground">FAQ</Link>
+      <Link to="/tarifs" onClick={() => setOpen(false)} className={linkCls}>Tarifs</Link>
+      <Link to="/faq" onClick={() => setOpen(false)} className={linkCls}>FAQ</Link>
     </>
   );
   return (
-    <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-5">
+    <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-5">
         <Logo />
-        <nav className="hidden items-center gap-7 md:flex">{links}</nav>
-        <div className="hidden md:block">
-          <Link to="/" hash="etapes" className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:bg-primary/90">
-            Commencer gratuitement
+        <nav aria-label="Navigation principale" className="hidden items-center gap-1 lg:flex">{links}</nav>
+        <div className="hidden items-center gap-2 lg:flex">
+          <Link to="/contact" className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90">
+            Nous contacter
           </Link>
         </div>
-        <button className="md:hidden" aria-label="Menu" aria-expanded={open} onClick={() => setOpen(!open)}>
-          {open ? <X /> : <Menu />}
+        <button className="grid h-10 w-10 place-items-center rounded-lg hover:bg-secondary lg:hidden" aria-label="Menu" aria-expanded={open} onClick={() => setOpen(!open)}>
+          {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </button>
       </div>
-      {open && <nav className="flex flex-col gap-4 border-t px-5 py-5 md:hidden">{links}</nav>}
+      {open && (
+        <nav aria-label="Navigation mobile" className="flex flex-col gap-1 border-t bg-card px-3 py-3 lg:hidden">
+          {links}
+          <Link to="/contact" onClick={() => setOpen(false)} className="mt-2 rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-semibold text-primary-foreground">Nous contacter</Link>
+        </nav>
+      )}
     </header>
   );
 }
@@ -52,9 +58,9 @@ export function SiteHeader() {
 export function SiteFooter() {
   return (
     <footer className="bg-ink text-ink-foreground">
-      <div className="mx-auto grid max-w-6xl gap-8 px-5 py-14 md:grid-cols-[2fr_1fr_1fr]">
+      <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 md:grid-cols-[2fr_1fr_1fr]">
         <div>
-          <p className="font-display text-3xl">Cretoria</p>
+          <Logo light />
           <p className="mt-3 max-w-sm text-sm text-ink-muted">La recherche d'emploi, organisée. Tu gardes la main à chaque étape.</p>
         </div>
         <div className="flex flex-col gap-2 text-sm text-ink-muted">
@@ -86,8 +92,8 @@ export function SiteLayout({ children }: { children: ReactNode }) {
 export function PageShell({ title, intro, children }: { title: string; intro?: string; children: ReactNode }) {
   return (
     <SiteLayout>
-      <section className="mx-auto max-w-3xl px-5 py-20">
-        <h1 className="font-display text-5xl md:text-6xl">{title}</h1>
+      <section className="mx-auto max-w-3xl px-5 py-16">
+        <h1 className="font-display text-4xl md:text-5xl">{title}</h1>
         {intro && <p className="mt-4 text-lg text-muted-foreground">{intro}</p>}
         <div className="mt-10 space-y-6 leading-relaxed">{children}</div>
       </section>
