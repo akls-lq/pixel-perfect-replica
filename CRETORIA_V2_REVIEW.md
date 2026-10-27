@@ -52,3 +52,4 @@ Les fichiers restent disponibles en diff sur la branche pour revue. Aucun push n
 ## Préparation Vercel
 
 `vercel.json` fixe l’installation Bun 1.4.4 avec verrou gelé et le build `NITRO_PRESET=vercel npm run build`. Ce build a été exécuté avec succès et produit `.vercel/output/config.json`, les fichiers statiques et la fonction serveur. `.vercel/` est ignoré par Git. Dans Vercel, utiliser Node.js 24 et le répertoire racine du dépôt ; supprimer tout ancien override de répertoire de sortie tel que `dist`. Le déploiement distant et la disponibilité publique ne sont pas validés. Le domaine fourni est bloqué par la politique réseau de cette session (proxy HTTP 403).
+Prévisualisation Vercel demandée par le propriétaire du projet.
