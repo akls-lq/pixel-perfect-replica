@@ -91,3 +91,4 @@ Fichiers : `src/components/landing/CompanyLogos.tsx`, `CompanyLogos.module.css`,
 5. Identifier une source d’offres autorisée et mesurer un matching explicable avant toute automatisation d’envoi.
 Validation du bloc de logos pour prévisualisation.
 Validation de la présentation simplifiée et des trois bibliothèques de documents.
+Validation du filtre de statut et du nettoyage de l’accueil et de l’Autopilote.
