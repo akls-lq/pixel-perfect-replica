@@ -14,10 +14,10 @@ import { usePreferences } from "@/components/preferences/usePreferences";
 import { FilterModal } from "@/components/workspace/FilterModal";
 import {
   emptyCriteria,
+  criteriaGroups,
   restoreCriteria,
   options,
   futureMonths,
-  type Group,
   type SearchCriteria,
 } from "@/lib/autopilot-data";
 import { PageTitle } from "@/components/workspace/Shared";
@@ -51,9 +51,7 @@ function Autopilot() {
     setResult(false);
   };
   const months = futureMonths(new Date());
-  const chips = (
-    Object.keys(emptyCriteria).filter((k) => k !== "q" && k !== "city") as Group[]
-  ).flatMap((group) =>
+  const chips = criteriaGroups.flatMap((group) =>
     criteria[group].map((value) => ({
       group,
       value,
@@ -73,6 +71,12 @@ function Autopilot() {
             ),
     })),
   );
+  const salaryChips = (["salaryMin", "salaryMax"] as const)
+    .filter((key) => criteria[key] !== "")
+    .map((key) => ({
+      key,
+      label: `${key === "salaryMin" ? t("Salaire min.", "Min. salary") : t("Salaire max.", "Max. salary")} : ${Number(criteria[key]).toLocaleString(t("fr-FR", "en-GB"))} € ${t("brut/an", "gross/year")}`,
+    }));
   return (
     <>
       <PageTitle
@@ -155,7 +159,7 @@ function Autopilot() {
             <SlidersHorizontal size={17} />
             {t("Tous les filtres", "All filters")}
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary-text">
-              {chips.length}
+              {chips.length + salaryChips.length}
             </span>
           </button>
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -166,7 +170,7 @@ function Autopilot() {
             )}
           </p>
         </div>
-        {chips.length > 0 && (
+        {chips.length + salaryChips.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2">
             {chips.map((c) => (
               <button
@@ -174,6 +178,17 @@ function Autopilot() {
                 onClick={() =>
                   set({ ...criteria, [c.group]: criteria[c.group].filter((v) => v !== c.value) })
                 }
+                className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs text-primary-text"
+                aria-label={`${t("Retirer", "Remove")} ${c.label}`}
+              >
+                {c.label}
+                <X size={12} />
+              </button>
+            ))}
+            {salaryChips.map((c) => (
+              <button
+                key={c.key}
+                onClick={() => set({ ...criteria, [c.key]: "" })}
                 className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs text-primary-text"
                 aria-label={`${t("Retirer", "Remove")} ${c.label}`}
               >

@@ -18,10 +18,12 @@ import { Route as FaqRouteImport } from './routes/faq'
 import { Route as MentionsLegalesRouteImport } from './routes/mentions-legales'
 import { Route as PresentationRouteImport } from './routes/presentation'
 import { Route as TarifsRouteImport } from './routes/tarifs'
+import { Route as ApiJobMapRouteImport } from './routes/api.job-map'
 import { Route as AppAccountsRouteImport } from './routes/app.accounts'
 import { Route as AppApplicationsRouteImport } from './routes/app.applications'
 import { Route as AppCvStudioRouteImport } from './routes/app.cv-studio'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
+import { Route as AppMapRouteImport } from './routes/app.map'
 import { Route as AppOffersRouteImport } from './routes/app.offers'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
@@ -73,6 +75,11 @@ const TarifsRoute = TarifsRouteImport.update({
   path: '/tarifs',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiJobMapRoute = ApiJobMapRouteImport.update({
+  id: '/api/job-map',
+  path: '/api/job-map',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppAccountsRoute = AppAccountsRouteImport.update({
   id: '/accounts',
   path: '/accounts',
@@ -91,6 +98,11 @@ const AppCvStudioRoute = AppCvStudioRouteImport.update({
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppMapRoute = AppMapRouteImport.update({
+  id: '/map',
+  path: '/map',
   getParentRoute: () => AppRoute,
 } as any)
 const AppOffersRoute = AppOffersRouteImport.update({
@@ -129,10 +141,12 @@ export interface FileRoutesByFullPath {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/presentation': typeof PresentationRoute
   '/tarifs': typeof TarifsRoute
+  '/api/job-map': typeof ApiJobMapRoute
   '/app/accounts': typeof AppAccountsRoute
   '/app/applications': typeof AppApplicationsRouteWithChildren
   '/app/cv-studio': typeof AppCvStudioRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/map': typeof AppMapRoute
   '/app/offers': typeof AppOffersRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
@@ -149,9 +163,11 @@ export interface FileRoutesByTo {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/presentation': typeof PresentationRoute
   '/tarifs': typeof TarifsRoute
+  '/api/job-map': typeof ApiJobMapRoute
   '/app/accounts': typeof AppAccountsRoute
   '/app/cv-studio': typeof AppCvStudioRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/map': typeof AppMapRoute
   '/app/offers': typeof AppOffersRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
@@ -169,10 +185,12 @@ export interface FileRoutesById {
   '/mentions-legales': typeof MentionsLegalesRoute
   '/presentation': typeof PresentationRoute
   '/tarifs': typeof TarifsRoute
+  '/api/job-map': typeof ApiJobMapRoute
   '/app/accounts': typeof AppAccountsRoute
   '/app/applications': typeof AppApplicationsRouteWithChildren
   '/app/cv-studio': typeof AppCvStudioRoute
   '/app/dashboard': typeof AppDashboardRoute
+  '/app/map': typeof AppMapRoute
   '/app/offers': typeof AppOffersRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
@@ -191,10 +209,12 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/presentation'
     | '/tarifs'
+    | '/api/job-map'
     | '/app/accounts'
     | '/app/applications'
     | '/app/cv-studio'
     | '/app/dashboard'
+    | '/app/map'
     | '/app/offers'
     | '/app/profile'
     | '/app/settings'
@@ -211,9 +231,11 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/presentation'
     | '/tarifs'
+    | '/api/job-map'
     | '/app/accounts'
     | '/app/cv-studio'
     | '/app/dashboard'
+    | '/app/map'
     | '/app/offers'
     | '/app/profile'
     | '/app/settings'
@@ -230,10 +252,12 @@ export interface FileRouteTypes {
     | '/mentions-legales'
     | '/presentation'
     | '/tarifs'
+    | '/api/job-map'
     | '/app/accounts'
     | '/app/applications'
     | '/app/cv-studio'
     | '/app/dashboard'
+    | '/app/map'
     | '/app/offers'
     | '/app/profile'
     | '/app/settings'
@@ -251,6 +275,7 @@ export interface RootRouteChildren {
   MentionsLegalesRoute: typeof MentionsLegalesRoute
   PresentationRoute: typeof PresentationRoute
   TarifsRoute: typeof TarifsRoute
+  ApiJobMapRoute: typeof ApiJobMapRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -318,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TarifsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/job-map': {
+      id: '/api/job-map'
+      path: '/api/job-map'
+      fullPath: '/api/job-map'
+      preLoaderRoute: typeof ApiJobMapRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/accounts': {
       id: '/app/accounts'
       path: '/accounts'
@@ -344,6 +376,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/app/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/map': {
+      id: '/app/map'
+      path: '/map'
+      fullPath: '/app/map'
+      preLoaderRoute: typeof AppMapRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/offers': {
@@ -403,6 +442,7 @@ interface AppRouteChildren {
   AppApplicationsRoute: typeof AppApplicationsRouteWithChildren
   AppCvStudioRoute: typeof AppCvStudioRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppMapRoute: typeof AppMapRoute
   AppOffersRoute: typeof AppOffersRoute
   AppProfileRoute: typeof AppProfileRoute
   AppSettingsRoute: typeof AppSettingsRoute
@@ -413,6 +453,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppApplicationsRoute: AppApplicationsRouteWithChildren,
   AppCvStudioRoute: AppCvStudioRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppMapRoute: AppMapRoute,
   AppOffersRoute: AppOffersRoute,
   AppProfileRoute: AppProfileRoute,
   AppSettingsRoute: AppSettingsRoute,
@@ -430,6 +471,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentionsLegalesRoute: MentionsLegalesRoute,
   PresentationRoute: PresentationRoute,
   TarifsRoute: TarifsRoute,
+  ApiJobMapRoute: ApiJobMapRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

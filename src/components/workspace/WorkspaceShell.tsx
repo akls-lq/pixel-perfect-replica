@@ -1,6 +1,7 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
+  Globe2,
   Bot,
   FileText,
   KanbanSquare,
@@ -24,6 +25,7 @@ import { Mascot } from "./Mascot";
 import { usePreferences } from "@/components/preferences/usePreferences";
 const navigation = [
   { to: "/app/dashboard", fr: "Dashboard", en: "Dashboard", icon: LayoutDashboard },
+  { to: "/app/map", fr: "Carte", en: "Map", icon: Globe2 },
   { to: "/app/offers", fr: "Autopilote", en: "Autopilot", icon: Bot },
   { to: "/app/cv-studio", fr: "CV", en: "CVs", icon: FileText },
   { to: "/app/applications", fr: "Suivi", en: "Applications", icon: KanbanSquare },
@@ -297,10 +299,15 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
         </header>
         <main id="workspace-main" className="mx-auto max-w-[1500px] px-2 py-7 md:px-5">
           <div className="mb-5 inline-flex rounded-full border bg-card/60 px-3 py-1 text-[10px] font-semibold text-muted-foreground">
-            {t(
-              "Démonstration · Données fictives · Aucun envoi réel",
-              "Demo · Fictional data · No real applications sent",
-            )}
+            {pathname === "/app/map"
+              ? t(
+                  "Sources d’offres · Aucune candidature envoyée",
+                  "Job sources · No applications sent",
+                )
+              : t(
+                  "Démonstration · Données fictives · Aucun envoi réel",
+                  "Demo · Fictional data · No real applications sent",
+                )}
           </div>
           {children}
         </main>

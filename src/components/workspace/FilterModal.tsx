@@ -24,6 +24,10 @@ export function FilterModal({
   const { t } = usePreferences();
   const [draft, setDraft] = useState(value);
   const [more, setMore] = useState(false);
+  const salaryError =
+    draft.salaryMin !== "" &&
+    draft.salaryMax !== "" &&
+    Number(draft.salaryMin) > Number(draft.salaryMax);
   const toggle = (group: Group, v: string) =>
     setDraft((d) => ({
       ...d,
@@ -97,6 +101,51 @@ export function FilterModal({
             </Dialog.Close>
           </div>
           <div className="min-h-0 overflow-y-auto px-6 md:px-9">
+            <fieldset className="border-b py-7">
+              <legend className="float-left mb-2 w-full text-base font-bold">
+                {t("Fourchette de salaire", "Salary range")}
+              </legend>
+              <p id="salary-unit" className="clear-both mb-5 text-xs text-muted-foreground">
+                {t(
+                  "En euros brut par an. Les deux bornes sont facultatives.",
+                  "Gross annual salary in euros. Both limits are optional.",
+                )}
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {(["salaryMin", "salaryMax"] as const).map((key) => (
+                  <label key={key} className="text-sm font-medium">
+                    {key === "salaryMin"
+                      ? t("Salaire minimum", "Minimum salary")
+                      : t("Salaire maximum", "Maximum salary")}
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min="0"
+                      max="99999999"
+                      step="1"
+                      value={draft[key]}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        if (next === "" || /^\d{1,8}$/.test(next))
+                          setDraft((d) => ({ ...d, [key]: next }));
+                      }}
+                      aria-describedby={`salary-unit${salaryError ? " salary-error" : ""}`}
+                      aria-invalid={salaryError || undefined}
+                      placeholder={key === "salaryMin" ? "30 000" : "55 000"}
+                      className="field"
+                    />
+                  </label>
+                ))}
+              </div>
+              {salaryError && (
+                <p id="salary-error" role="alert" className="mt-3 text-sm text-red-800">
+                  {t(
+                    "Le salaire minimum doit être inférieur ou égal au maximum.",
+                    "The minimum salary must not exceed the maximum.",
+                  )}
+                </p>
+              )}
+            </fieldset>
             {section("durations", "Durée", "Duration", options("durations"))}
             {section("functions", "Fonction", "Job function", options("functions"), true)}
             {section("experience", "Expérience", "Experience", options("experience"))}
@@ -135,7 +184,7 @@ export function FilterModal({
             >
               {t("Tout effacer", "Clear all")}
             </button>
-            <button onClick={() => onApply(draft)} className="btn-primary">
+            <button disabled={salaryError} onClick={() => onApply(draft)} className="btn-primary">
               {t("Appliquer", "Apply")}
             </button>
           </footer>

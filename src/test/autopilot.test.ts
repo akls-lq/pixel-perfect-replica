@@ -75,6 +75,25 @@ describe("Critères persistants et multisélection", () => {
       "2027-02",
     ]);
   });
+  it("borne les salaires des deux côtés et permet une seule borne", () => {
+    expect(
+      selectDemoJobs({ ...emptyCriteria, salaryMin: "42000", salaryMax: "48000" }).map(
+        (j) => j.salary,
+      ),
+    ).toEqual([48000, 42000, 44000]);
+    expect(selectDemoJobs({ ...emptyCriteria, salaryMax: "12000" }).map((j) => j.salary)).toEqual([
+      12000,
+    ]);
+    expect(selectDemoJobs({ ...emptyCriteria, salaryMin: "70000" })).toEqual([]);
+  });
+  it("restaure les anciens critères et écarte les salaires invalides", () => {
+    expect(restoreCriteria({ contracts: ["CDI"] }).salaryMin).toBe("");
+    expect(restoreCriteria({ salaryMin: "30000", salaryMax: "55000" }).salaryMax).toBe("55000");
+    expect(restoreCriteria({ salaryMin: "55000", salaryMax: "30000" }).salaryMin).toBe("");
+    for (const invalid of [-1, "-1", "Infinity", "NaN", "1e6", "1.5", "100000000", {}]) {
+      expect(restoreCriteria({ salaryMin: invalid }).salaryMin).toBe("");
+    }
+  });
   it("filtre par département et renvoie un état vide sans données inventées", () => {
     expect(
       selectDemoJobs({ ...emptyCriteria, city: "69", contracts: ["CDI"] }).map((j) => j.id),

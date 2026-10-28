@@ -1,0 +1,165 @@
+.job-globe {
+  position: relative;
+  isolation: isolate;
+  min-width: 0;
+  height: 640px;
+  overflow: hidden;
+  border-radius: 1.5rem;
+  background: radial-gradient(ellipse at 50% 50%, #1b2a4b, #080f20 75%);
+  color: #eef3ff;
+}
+.job-globe-canvas {
+  position: absolute;
+  inset: 0;
+}
+.job-globe .maplibregl-canvas {
+  cursor: grab;
+}
+.job-globe .maplibregl-canvas:active {
+  cursor: grabbing;
+}
+.job-map-loading {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 40px;
+  text-align: center;
+  background: #080f20dd;
+  font-size: 14px;
+}
+.job-map-mode {
+  position: absolute;
+  top: 18px;
+  left: 18px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid #64799e66;
+  border-radius: 999px;
+  padding: 8px 12px;
+  background: #101c32cc;
+  font-size: 11px;
+}
+.job-map-controls {
+  position: absolute;
+  right: 18px;
+  top: 18px;
+  display: flex;
+  flex-direction: column;
+  padding: 4px;
+  border: 1px solid #64799e66;
+  border-radius: 14px;
+  background: #101c32ee;
+  box-shadow: 0 4px 16px #0003;
+}
+.job-map-controls button {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+}
+.job-map-controls button:hover {
+  background: #30425b;
+}
+.job-map-controls button:disabled {
+  opacity: 0.4;
+}
+.job-map-bottom {
+  position: absolute;
+  bottom: 40px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  pointer-events: none;
+  font-size: 11px;
+  color: #d1dcef;
+}
+.job-map-bottom label {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #101c32ee;
+  pointer-events: auto;
+}
+.job-map-bottom > span {
+  padding: 7px 10px;
+  border-radius: 8px;
+  background: #101c32dd;
+}
+.job-map-attribution {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  max-width: calc(100% - 28px);
+  border-radius: 5px;
+  padding: 3px 7px;
+  background: #101c32dd;
+  color: #c6d2e8;
+  font-size: 10px;
+}
+.job-map-attribution a {
+  text-decoration: underline;
+}
+.job-map-tile-error {
+  position: absolute;
+  bottom: 84px;
+  left: 18px;
+  max-width: calc(100% - 90px);
+  border-radius: 8px;
+  padding: 8px;
+  background: #101c32ee;
+  color: #e4eaff;
+  font-size: 11px;
+}
+.job-map-marker {
+  display: grid;
+  place-items: center;
+  min-width: 30px;
+  height: 30px;
+  border: 2px solid #eef3ff;
+  border-radius: 999px;
+  padding: 0 7px;
+  background: #4f5cf1;
+  color: #fff;
+  box-shadow: 0 3px 12px #0005;
+  font:
+    700 12px system-ui,
+    sans-serif;
+  cursor: pointer;
+}
+.job-map-cluster {
+  min-width: 40px;
+  height: 40px;
+  background: #0db89a;
+  color: #101936;
+}
+.job-map-marker:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 4px;
+}
+.job-map-marker.maplibregl-marker-covered {
+  pointer-events: none;
+  visibility: hidden;
+}
+@media (max-width: 639px) {
+  .job-globe {
+    height: 480px;
+  }
+  .job-map-bottom {
+    bottom: 46px;
+    left: 12px;
+    right: 12px;
+    font-size: 10px;
+  }
+  .job-map-bottom > span {
+    max-width: 180px;
+  }
+}

@@ -91,10 +91,18 @@ export const filterGroups = {
   ],
 } satisfies Record<string, string[][]>;
 export type Group = keyof typeof filterGroups | "start";
-export type SearchCriteria = { q: string; city: string } & Record<Group, string[]>;
+export const criteriaGroups = [...Object.keys(filterGroups), "start"] as Group[];
+export type SearchCriteria = {
+  q: string;
+  city: string;
+  salaryMin: string;
+  salaryMax: string;
+} & Record<Group, string[]>;
 export const emptyCriteria: SearchCriteria = {
   q: "",
   city: "",
+  salaryMin: "",
+  salaryMax: "",
   contracts: [],
   durations: [],
   functions: [],
@@ -116,7 +124,13 @@ export function restoreCriteria(value: unknown): SearchCriteria {
   const v = value as Record<string, unknown>;
   for (const k of ["q", "city"] as const)
     if (typeof v[k] === "string") result[k] = (v[k] as string).slice(0, 200);
-  for (const k of Object.keys(emptyCriteria).filter((k) => k !== "q" && k !== "city") as Group[]) {
+  for (const k of ["salaryMin", "salaryMax"] as const)
+    if (typeof v[k] === "string" && /^\d{1,8}$/.test(v[k] as string)) result[k] = v[k] as string;
+  if (result.salaryMin && result.salaryMax && Number(result.salaryMin) > Number(result.salaryMax)) {
+    result.salaryMin = "";
+    result.salaryMax = "";
+  }
+  for (const k of criteriaGroups) {
     if (Array.isArray(v[k]))
       result[k] = (v[k] as unknown[]).filter(
         (x): x is string =>
@@ -178,6 +192,8 @@ export function selectDemoJobs(f: SearchCriteria) {
     const has = (key: Group, test: (v: string) => boolean) => !f[key].length || f[key].some(test);
     return (
       (!f.q || norm(`${j.title} ${j.company} ${j.skills.join(" ")}`).includes(norm(f.q))) &&
+      (!f.salaryMin || j.salary >= Number(f.salaryMin)) &&
+      (!f.salaryMax || j.salary <= Number(f.salaryMax)) &&
       (!f.city ||
         norm(
           `${j.city} ${j.region} ${{ Paris: "75", Lyon: "69 Rhône", Nantes: "44 Loire-Atlantique", Bordeaux: "33 Gironde", Lille: "59 Nord" }[j.city] ?? ""}`,
