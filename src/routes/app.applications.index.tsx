@@ -22,7 +22,8 @@ function Applications() {
       const job = jobs.find((j) => j.id === a.jobId);
       return (
         (stage === "all" ||
-          stage === "submitted" ||
+          (stage === "submitted" && a.stage === "Envoyée") ||
+          (stage === "reply" && a.stage === "Réponse reçue") ||
           ((stage === "pending" || stage === "no-response") && !a.responseAt) ||
           (stage === "ongoing" && ["Réponse reçue", "Entretien"].includes(a.stage)) ||
           (stage === "interview" && a.stage === "Entretien") ||
@@ -39,6 +40,7 @@ function Applications() {
   const choices = [
     { value: "all", fr: "Toutes", en: "All" },
     { value: "submitted", fr: "Envoyées", en: "Submitted" },
+    { value: "reply", fr: "Réponse reçue", en: "Reply received" },
     { value: "pending", fr: "En attente", en: "Awaiting reply" },
     { value: "no-response", fr: "Sans réponse", en: "No response" },
     {
@@ -68,7 +70,24 @@ function Applications() {
           "Keep track of responses, documents and next steps. Fictional data, with no email connection.",
         )}
       >
-        <PeriodFilter value={period} onChange={setPeriod} />
+        <div className="flex flex-wrap items-center gap-4">
+          <PeriodFilter value={period} onChange={setPeriod} />
+          <label className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
+            {t("Statut", "Status")}
+            <select
+              aria-label={t("Statut", "Status")}
+              value={stage}
+              onChange={(e) => setStage(e.target.value)}
+              className="w-44 rounded-lg border bg-card px-3 py-2.5 text-sm text-foreground"
+            >
+              {choices.map((o) => (
+                <option key={o.value} value={o.value} disabled={o.disabled}>
+                  {t(o.fr, o.en)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </PageTitle>
       <div className="mb-5 grid gap-4 sm:grid-cols-3">
         {[
@@ -101,21 +120,7 @@ function Applications() {
               placeholder={t("Rechercher un poste…", "Search job titles…")}
             />
           </label>
-          <label className="text-xs font-semibold">
-            {t("Statut", "Status")}
-            <select
-              className="field"
-              aria-label={t("Statut", "Status")}
-              value={stage}
-              onChange={(e) => setStage(e.target.value)}
-            >
-              {choices.map((o) => (
-                <option key={o.value} value={o.value} disabled={o.disabled}>
-                  {t(o.fr, o.en)}
-                </option>
-              ))}
-            </select>
-          </label>
+
           <label className="text-xs font-semibold">
             {t("Entreprise", "Company")}
             <select

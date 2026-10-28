@@ -11,6 +11,7 @@ export function CompanyLogos() {
   const [transitioning, setTransitioning] = useState(false);
   const [reduced, setReduced] = useState(true);
   const [paused, setPaused] = useState(false);
+  const [hovered, setHovered] = useState(false);
   const [inView, setInView] = useState(false);
   const [tabVisible, setTabVisible] = useState(true);
   useEffect(() => {
@@ -51,7 +52,7 @@ export function CompanyLogos() {
     };
   }, []);
   useEffect(() => {
-    if (reduced || paused || !inView || !tabVisible) return;
+    if (reduced || paused || hovered || !inView || !tabVisible) return;
     let settle: ReturnType<typeof setTimeout> | undefined;
     const interval = setInterval(() => {
       setCycle((c) => c + 1);
@@ -62,11 +63,20 @@ export function CompanyLogos() {
       clearInterval(interval);
       if (settle) clearTimeout(settle);
     };
-  }, [columns, reduced, paused, inView, tabVisible]);
+  }, [columns, reduced, paused, hovered, inView, tabVisible]);
   const logoAt = (group: number, column: number) =>
     companyLogos[(group * columns + column) % companyLogos.length]!;
   return (
-    <section ref={section} className={styles["section"]} aria-labelledby="company-logos-heading">
+    <section
+      ref={section}
+      className={styles["section"]}
+      aria-labelledby="company-logos-heading"
+      onMouseEnter={() => {
+        setHovered(true);
+        setTransitioning(false);
+      }}
+      onMouseLeave={() => setHovered(false)}
+    >
       <div className={styles["inner"]}>
         <h2 id="company-logos-heading" className={styles["heading"]}>
           {t("Ton prochain chapitre pourrait commencer chez…", "Your next chapter could start at…")}
@@ -112,32 +122,24 @@ export function CompanyLogos() {
             );
           })}
         </div>
-        <div className={styles["footer"]}>
-          <p className={styles["note"]}>
-            {t(
-              "Exemples d’employeurs · Aucun partenariat ni recrutement revendiqué.",
-              "Example employers · No partnership or successful placement is claimed.",
-            )}
-          </p>
-          {!reduced && (
-            <button
-              type="button"
-              className={styles["control"]}
-              onClick={() => {
-                setPaused((v) => !v);
-                setTransitioning(false);
-              }}
-              aria-pressed={paused}
-              aria-label={
-                paused
-                  ? t("Reprendre l’animation des logos", "Resume logo animation")
-                  : t("Mettre l’animation des logos en pause", "Pause logo animation")
-              }
-            >
-              {paused ? <Play size={12} /> : <Pause size={12} />}
-            </button>
-          )}
-        </div>
+        {!reduced && (
+          <button
+            type="button"
+            className={styles["control"]}
+            onClick={() => {
+              setPaused((v) => !v);
+              setTransitioning(false);
+            }}
+            aria-pressed={paused}
+            aria-label={
+              paused
+                ? t("Reprendre l’animation des logos", "Resume logo animation")
+                : t("Mettre l’animation des logos en pause", "Pause logo animation")
+            }
+          >
+            {paused ? <Play size={12} /> : <Pause size={12} />}
+          </button>
+        )}
       </div>
     </section>
   );

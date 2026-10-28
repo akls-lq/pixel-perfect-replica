@@ -20,7 +20,7 @@ import {
   type Group,
   type SearchCriteria,
 } from "@/lib/autopilot-data";
-import { PageTitle, EmptyState } from "@/components/workspace/Shared";
+import { PageTitle } from "@/components/workspace/Shared";
 export const Route = createFileRoute("/app/offers")({ component: Autopilot });
 function Autopilot() {
   const { t } = usePreferences();
@@ -220,12 +220,6 @@ function Autopilot() {
           )}
         </p>
       )}
-      <EmptyState title={t("Aucune source d’offres connectée.", "No job source connected.")}>
-        {t(
-          "Configure tes critères ci-dessus. Les offres apparaîtront lorsque la recherche sera connectée à des sources réelles. Aucune candidature n’est envoyée depuis cette page.",
-          "Set your criteria above. Listings will appear once search is connected to real sources. No applications are sent from this page.",
-        )}
-      </EmptyState>
     </>
   );
 }
