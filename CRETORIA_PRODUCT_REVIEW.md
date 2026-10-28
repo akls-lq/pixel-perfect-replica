@@ -90,3 +90,4 @@ Fichiers : `src/components/landing/CompanyLogos.tsx`, `CompanyLogos.module.css`,
 4. Livrer puis tester un suivi persistant avec import manuel par URL et documents versionnés.
 5. Identifier une source d’offres autorisée et mesurer un matching explicable avant toute automatisation d’envoi.
 Validation du bloc de logos pour prévisualisation.
+Validation de la présentation simplifiée et des trois bibliothèques de documents.
