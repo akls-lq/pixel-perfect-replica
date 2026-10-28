@@ -1,11 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { WorkspaceShell } from "@/components/workspace/WorkspaceShell";
-import { Overview } from "@/components/workspace/Overview";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 export const Route = createFileRoute("/")({
-  head: () => ({ meta: [{ title: "Mon tableau de bord — Crétoria" }] }),
-  component: () => (
-    <WorkspaceShell>
-      <Overview />
-    </WorkspaceShell>
-  ),
+  beforeLoad: () => {
+    throw redirect({ to: "/presentation", replace: true });
+  },
 });

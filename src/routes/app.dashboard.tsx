@@ -1,6 +1,6 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { Overview } from "@/components/workspace/Overview";
 export const Route = createFileRoute("/app/dashboard")({
-  beforeLoad: () => {
-    throw redirect({ to: "/" });
-  },
+  head: () => ({ meta: [{ title: "Dashboard — Crétoria" }] }),
+  component: Overview,
 });

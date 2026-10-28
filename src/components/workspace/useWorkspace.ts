@@ -1,7 +1,7 @@
 import { createContext, useContext } from "react";
 import type { Account } from "@/lib/account-data";
 import type { Application } from "@/lib/workspace-data";
-type Resume = { file: File; url: string };
+export type Resume = { file: File; url: string };
 export type State = {
   accounts: Account[];
   setAccounts: React.Dispatch<React.SetStateAction<Account[]>>;
@@ -15,6 +15,10 @@ export type State = {
   reviewJob: (id: string) => void;
   resumes: Resume[];
   setResumes: React.Dispatch<React.SetStateAction<Resume[]>>;
+  englishResumes: Resume[];
+  setEnglishResumes: React.Dispatch<React.SetStateAction<Resume[]>>;
+  coverLetters: Resume[];
+  setCoverLetters: React.Dispatch<React.SetStateAction<Resume[]>>;
   resume: Resume | null;
   setResume: (resume: Resume | null) => void;
 };

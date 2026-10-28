@@ -23,7 +23,7 @@ import * as Dropdown from "@radix-ui/react-dropdown-menu";
 import { Mascot } from "./Mascot";
 import { usePreferences } from "@/components/preferences/usePreferences";
 const navigation = [
-  { to: "/", fr: "Dashboard", en: "Dashboard", icon: LayoutDashboard },
+  { to: "/app/dashboard", fr: "Dashboard", en: "Dashboard", icon: LayoutDashboard },
   { to: "/app/offers", fr: "Autopilote", en: "Autopilot", icon: Bot },
   { to: "/app/cv-studio", fr: "CV", en: "CVs", icon: FileText },
   { to: "/app/applications", fr: "Suivi", en: "Applications", icon: KanbanSquare },
@@ -42,11 +42,15 @@ function Navigation({
       <div
         className={`flex items-center gap-2 border-b px-5 py-5 ${collapsed ? "justify-center" : ""}`}
       >
-        <Link to="/" onClick={onNavigate} aria-label="Crétoria">
+        <Link to="/presentation" onClick={onNavigate} aria-label="Crétoria">
           <Mascot size={38} />
         </Link>
         {!collapsed && (
-          <Link to="/" onClick={onNavigate} className="text-xl font-extrabold tracking-tight">
+          <Link
+            to="/presentation"
+            onClick={onNavigate}
+            className="text-xl font-extrabold tracking-tight"
+          >
             Crétoria<span className="text-primary-text">.</span>
           </Link>
         )}
@@ -64,7 +68,7 @@ function Navigation({
               to={n.to}
               onClick={onNavigate}
               title={collapsed ? t(n.fr, n.en) : undefined}
-              activeOptions={{ exact: n.to === "/" }}
+              activeOptions={{ exact: n.to === "/app/dashboard" }}
               activeProps={{
                 className: "bg-card text-foreground shadow-soft border-border",
                 "aria-current": "page",
@@ -117,14 +121,14 @@ export function WorkspaceShell({ children }: { children: ReactNode }) {
   const [mobile, setMobile] = useState(false);
   const [search, setSearch] = useState("");
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const current = navigation.find((n) =>
-    n.to === "/" ? pathname === "/" : pathname.startsWith(n.to),
-  );
+  const current = navigation.find((n) => pathname.startsWith(n.to));
   const title = current
     ? t(current.fr, current.en)
-    : pathname.includes("settings")
-      ? t("Paramètres", "Settings")
-      : t("Mon compte", "My account");
+    : pathname === "/presentation"
+      ? t("Présentation", "Overview")
+      : pathname.includes("settings")
+        ? t("Paramètres", "Settings")
+        : t("Mon compte", "My account");
   return (
     <div className="workspace-bg min-h-screen p-2 md:p-3">
       <a

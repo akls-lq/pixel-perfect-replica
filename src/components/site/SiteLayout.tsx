@@ -3,7 +3,7 @@ import { Menu, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 const nav = [
-  { to: "/", label: "Accueil" },
+  { to: "/app/dashboard", label: "Dashboard" },
   { to: "/app/offers", label: "Offres" },
   { to: "/app/cv-studio", label: "CV Studio" },
   { to: "/app/applications", label: "Suivi" },
@@ -13,7 +13,7 @@ const nav = [
 export function Logo({ light = false }: { light?: boolean }) {
   return (
     <Link
-      to="/"
+      to="/presentation"
       className={`flex items-center gap-2 text-lg font-extrabold tracking-tight ${light ? "text-ink-foreground" : "text-foreground"}`}
     >
       <span className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-sm font-extrabold text-primary-foreground">
@@ -52,7 +52,7 @@ export function SiteHeader() {
         </nav>
         <div className="hidden items-center gap-2 lg:flex">
           <Link
-            to="/"
+            to="/app/dashboard"
             className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
           >
             Explorer la démo
@@ -74,7 +74,7 @@ export function SiteHeader() {
         >
           {links}
           <Link
-            to="/"
+            to="/app/dashboard"
             onClick={() => setOpen(false)}
             className="mt-2 rounded-lg bg-primary px-4 py-2.5 text-center text-sm font-semibold text-primary-foreground"
           >
