@@ -89,3 +89,4 @@ Fichiers : `src/components/landing/CompanyLogos.tsx`, `CompanyLogos.module.css`,
 3. Décider de l’authentification, de l’isolation des dossiers et du stockage privé avant tout CV réel sur serveur.
 4. Livrer puis tester un suivi persistant avec import manuel par URL et documents versionnés.
 5. Identifier une source d’offres autorisée et mesurer un matching explicable avant toute automatisation d’envoi.
+Validation du bloc de logos pour prévisualisation.
