@@ -54,3 +54,4 @@ Captures et scripts : `/workspace/review-cretoria-v4/` (hors dépôt). Les polic
 
 Pour lancer localement : `npm run dev -- --host 0.0.0.0 --port 3000` depuis le dépôt, puis ouvrir `/`. Pour la revue visuelle Vercel, utiliser le déploiement de la branche `feat/cretoria-v2`, sans fusion automatique sur `main`.
 Déploiement de la nouvelle interface demandé par le propriétaire.
+Validation des couleurs Crétoria et du retrait des offres de démonstration.
