@@ -53,3 +53,4 @@ La validation des CV porte sur l’extension, la taille (10 Mo), l’absence de 
 Captures et scripts : `/workspace/review-cretoria-v4/` (hors dépôt). Les polices Google sont bloquées dans le réseau de test ; les captures utilisent la police système de secours. Les pages publiques et les URLs existantes sont conservées. Le déploiement distant Vercel n’est pas validé dans cette session ; sa politique sur l’auteur des commits peut toujours demander une action du propriétaire.
 
 Pour lancer localement : `npm run dev -- --host 0.0.0.0 --port 3000` depuis le dépôt, puis ouvrir `/`. Pour la revue visuelle Vercel, utiliser le déploiement de la branche `feat/cretoria-v2`, sans fusion automatique sur `main`.
+Déploiement de la nouvelle interface demandé par le propriétaire.
