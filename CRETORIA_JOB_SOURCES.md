@@ -82,3 +82,4 @@ et ne lance aucune recherche distante ou candidature automatique.
   marqueurs, liens source, salaire persistant, français/anglais, clair/sombre,
   mobile et accessibilité Axe. Les offres de test sont injectées uniquement par
   le navigateur de vérification et ne font pas partie du site livré.
+Version carte, salaires et nouvel accueil à publier.
