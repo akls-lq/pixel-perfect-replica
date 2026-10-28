@@ -7,7 +7,7 @@ const nav = [
   { to: "/app/offers", label: "Offres" },
   { to: "/app/cv-studio", label: "CV Studio" },
   { to: "/app/applications", label: "Suivi" },
-  { to: "/app/accounts", label: "Comptes employeurs" },
+  { to: "/app/accounts", label: "Mes comptes" },
 ] as const;
 
 export function Logo({ light = false }: { light?: boolean }) {

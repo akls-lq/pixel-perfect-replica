@@ -19,6 +19,8 @@ export type State = {
   setEnglishResumes: React.Dispatch<React.SetStateAction<Resume[]>>;
   coverLetters: Resume[];
   setCoverLetters: React.Dispatch<React.SetStateAction<Resume[]>>;
+  additionalDocuments: Resume[];
+  setAdditionalDocuments: React.Dispatch<React.SetStateAction<Resume[]>>;
   resume: Resume | null;
   setResume: (resume: Resume | null) => void;
 };

@@ -6,16 +6,24 @@ import { DocumentLibrary } from "@/components/workspace/DocumentLibrary";
 export const Route = createFileRoute("/app/cv-studio")({ component: CvStudio });
 function CvStudio() {
   const { t } = usePreferences();
-  const { resumes, setResumes, englishResumes, setEnglishResumes, coverLetters, setCoverLetters } =
-    useWorkspace();
+  const {
+    resumes,
+    setResumes,
+    englishResumes,
+    setEnglishResumes,
+    coverLetters,
+    setCoverLetters,
+    additionalDocuments,
+    setAdditionalDocuments,
+  } = useWorkspace();
   return (
     <>
       <PageTitle
         eyebrow={t("TES DOCUMENTS DE RÉFÉRENCE", "YOUR REFERENCE DOCUMENTS")}
         title={t("Tes CV et lettres de motivation.", "Your CVs and cover letters.")}
         description={t(
-          "Trois CV français, trois CV anglais et trois modèles de lettres de motivation. Chaque catégorie a son propre espace.",
-          "Three French CVs, three English CVs and three cover letter templates. Each category has its own space.",
+          "Trois CV français, trois CV anglais, trois lettres de motivation et autant de documents supplémentaires que tu le souhaites.",
+          "Three French CVs, three English CVs, three cover letters and as many supporting documents as you need.",
         )}
       />
       <div className="mx-auto max-w-4xl space-y-6">
@@ -36,6 +44,18 @@ function CvStudio() {
           inputLabel={t("Ajouter des lettres de motivation", "Add cover letters")}
           files={coverLetters}
           setFiles={setCoverLetters}
+        />
+        <DocumentLibrary
+          title={t("Documents supplémentaires", "Additional documents")}
+          description={t(
+            "Calendrier d’alternance, justificatifs de situation de handicap et autres pièces utiles à tes candidatures. Aucun nombre maximum de fichiers.",
+            "Work-study calendars, disability-related documents and other useful application files. No limit on the number of files.",
+          )}
+          inputLabel={t("Ajouter des documents supplémentaires", "Add additional documents")}
+          files={additionalDocuments}
+          setFiles={setAdditionalDocuments}
+          maxFiles={null}
+          formats="supporting"
         />
         <p className="text-xs leading-relaxed text-muted-foreground">
           {t(

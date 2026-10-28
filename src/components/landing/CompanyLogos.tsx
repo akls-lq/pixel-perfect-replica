@@ -79,12 +79,12 @@ export function CompanyLogos() {
     >
       <div className={styles["inner"]}>
         <h2 id="company-logos-heading" className={styles["heading"]}>
-          {t("Ton prochain chapitre pourrait commencer chez…", "Your next chapter could start at…")}
+          {t(
+            "nos utilisateurs ont réussi a décrocher un job chez eux :",
+            "our users have successfully landed a job at these companies:",
+          )}
         </h2>
-        <ul
-          className="sr-only"
-          aria-label={t("Exemples d’entreprises à explorer", "Examples of employers to explore")}
-        >
+        <ul className="sr-only" aria-label={t("Entreprises affichées", "Displayed companies")}>
           {companyLogos.map((logo) => (
             <li key={logo.name}>{logo.name}</li>
           ))}

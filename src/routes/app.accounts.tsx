@@ -6,7 +6,7 @@ import { Eye, EyeOff, Copy, KeyRound, Plus, ExternalLink, Trash2, ShieldCheck } 
 import { PageTitle, EmptyState } from "@/components/workspace/Shared";
 import { safeUrl } from "@/lib/workspace-data";
 export const Route = createFileRoute("/app/accounts")({
-  head: () => ({ meta: [{ title: "Comptes employeurs — Crétoria" }] }),
+  head: () => ({ meta: [{ title: "Mes comptes — Crétoria" }] }),
   component: Accounts,
 });
 function Accounts() {

@@ -27,7 +27,7 @@ const navigation = [
   { to: "/app/offers", fr: "Autopilote", en: "Autopilot", icon: Bot },
   { to: "/app/cv-studio", fr: "CV", en: "CVs", icon: FileText },
   { to: "/app/applications", fr: "Suivi", en: "Applications", icon: KanbanSquare },
-  { to: "/app/accounts", fr: "Compte fournisseur", en: "Provider accounts", icon: KeyRound },
+  { to: "/app/accounts", fr: "Mes comptes", en: "My accounts", icon: KeyRound },
 ] as const;
 function Navigation({
   collapsed = false,
@@ -51,7 +51,7 @@ function Navigation({
             onClick={onNavigate}
             className="text-xl font-extrabold tracking-tight"
           >
-            Crétoria<span className="text-primary-text">.</span>
+            Crétoria
           </Link>
         )}
       </div>
@@ -83,19 +83,6 @@ function Navigation({
             </Link>
           ))}
         </nav>
-        {!collapsed && (
-          <div className="mt-9 rounded-2xl border bg-primary/5 p-4">
-            <p className="text-xs font-bold text-primary-text">
-              {t("Un pas à la fois.", "One step at a time.")}
-            </p>
-            <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              {t(
-                "Prépare ta prochaine opportunité avec confiance.",
-                "Prepare your next opportunity with confidence.",
-              )}
-            </p>
-          </div>
-        )}
       </div>
       <Link
         to="/app/profile"

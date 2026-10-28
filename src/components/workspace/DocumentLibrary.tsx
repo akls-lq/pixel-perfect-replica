@@ -12,16 +12,26 @@ import { RunningLoader } from "./RunningLoader";
 import { usePreferences } from "@/components/preferences/usePreferences";
 export function DocumentLibrary({
   title,
+  description,
   inputLabel,
   files,
   setFiles,
+  maxFiles = 3,
+  formats = "documents",
 }: {
   title: string;
+  description?: string;
   inputLabel: string;
   files: Resume[];
   setFiles: Dispatch<SetStateAction<Resume[]>>;
+  maxFiles?: number | null;
+  formats?: "documents" | "supporting";
 }) {
   const { t } = usePreferences();
+  const extensions =
+    formats === "supporting"
+      ? ["pdf", "doc", "docx", "png", "jpg", "jpeg", "xls", "xlsx", "csv", "txt", "ics"]
+      : ["pdf", "doc", "docx"];
   const input = useRef<HTMLInputElement>(null);
   const replacing = useRef<number | null>(null);
   const busy = useRef(false);
@@ -42,15 +52,18 @@ export function DocumentLibrary({
     setMessage("");
     const replace = replacing.current;
     if (
-      (replace === null && files.length + selected.length > 3) ||
+      (replace === null && maxFiles !== null && files.length + selected.length > maxFiles) ||
       (replace !== null && selected.length > 1)
     ) {
       setError(
-        t(
-          "Trois fichiers maximum dans cette catégorie. Supprime ou remplace un document.",
-          "Up to three files per category. Remove or replace a document.",
-        ),
+        replace !== null
+          ? t("Choisis un seul fichier pour le remplacement.", "Choose one replacement file.")
+          : t(
+              `${maxFiles} fichiers maximum dans cette catégorie. Supprime ou remplace un document.`,
+              `Up to ${maxFiles} files per category. Remove or replace a document.`,
+            ),
       );
+      replacing.current = null;
       if (input.current) input.current.value = "";
       return;
     }
@@ -59,9 +72,12 @@ export function DocumentLibrary({
     try {
       for (const file of selected) {
         const ext = file.name.split(".").pop()?.toLowerCase();
-        if (!["pdf", "doc", "docx"].includes(ext ?? ""))
+        if (!extensions.includes(ext ?? ""))
           throw Error(
-            t("Formats autorisés : PDF, DOC et DOCX.", "Allowed formats: PDF, DOC and DOCX."),
+            t(
+              `Formats autorisés : ${extensions.join(", ").toUpperCase()}.`,
+              `Allowed formats: ${extensions.join(", ").toUpperCase()}.`,
+            ),
           );
         if (file.size === 0 || file.size > 10 * 1024 * 1024)
           throw Error(
@@ -71,13 +87,39 @@ export function DocumentLibrary({
             ),
           );
         const bytes = new Uint8Array(await file.slice(0, 8).arrayBuffer());
-        const valid =
-          ext === "pdf"
-            ? new TextDecoder().decode(bytes.slice(0, 5)) === "%PDF-"
-            : ext === "doc"
-              ? bytes.length >= 8 &&
-                bytes.slice(0, 8).every((b, i) => b === [208, 207, 17, 224, 161, 177, 26, 225][i])
-              : bytes[0] === 80 && bytes[1] === 75 && bytes[2] === 3 && bytes[3] === 4;
+        let valid = false;
+        switch (ext) {
+          case "pdf":
+            valid = new TextDecoder().decode(bytes.slice(0, 5)) === "%PDF-";
+            break;
+          case "doc":
+          case "xls":
+            valid =
+              bytes.length >= 8 &&
+              bytes.every((b, i) => b === [208, 207, 17, 224, 161, 177, 26, 225][i]);
+            break;
+          case "docx":
+          case "xlsx":
+            valid = bytes[0] === 80 && bytes[1] === 75 && bytes[2] === 3 && bytes[3] === 4;
+            break;
+          case "png":
+            valid =
+              bytes.length >= 8 &&
+              bytes.every((b, i) => b === [137, 80, 78, 71, 13, 10, 26, 10][i]);
+            break;
+          case "jpg":
+          case "jpeg":
+            valid = bytes[0] === 255 && bytes[1] === 216 && bytes[2] === 255;
+            break;
+          case "csv":
+          case "txt":
+          case "ics": {
+            const text = await file.text();
+            valid = !text.includes("\u0000") && text.trim().length > 0;
+            if (ext === "ics") valid = valid && text.trimStart().startsWith("BEGIN:VCALENDAR");
+            break;
+          }
+        }
         if (!valid)
           throw Error(
             t(
@@ -120,13 +162,20 @@ export function DocumentLibrary({
   return (
     <section className="panel" aria-label={title}>
       <div className="mb-5 flex items-center justify-between gap-3">
-        <h2 className="font-semibold">{title}</h2>
+        <div>
+          <h2 className="font-semibold">{title}</h2>
+          {description && (
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{description}</p>
+          )}
+        </div>
         <span
           aria-label={`${title} : ${t("fichiers ajoutés", "files added")}`}
-          className="rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary-text"
+          className="shrink-0 rounded-full bg-primary/10 px-3 py-1 text-xs font-bold text-primary-text"
           aria-live="polite"
         >
-          {files.length}/3
+          {maxFiles === null
+            ? `${files.length} ${t(files.length > 1 ? "fichiers" : "fichier", files.length === 1 ? "file" : "files")}`
+            : `${files.length}/${maxFiles}`}
         </span>
       </div>
       <div
@@ -143,10 +192,14 @@ export function DocumentLibrary({
           {t("Glisse tes fichiers ici", "Drop your files here")}
         </h3>
         <p className="mt-2 text-sm text-muted-foreground">
-          PDF · DOC · DOCX · {t("10 Mo par fichier", "10 MB per file")}
+          {formats === "supporting"
+            ? "PDF · DOC · DOCX · PNG · JPG · XLS · XLSX · CSV · TXT · ICS"
+            : "PDF · DOC · DOCX"}
+          {" · "}
+          {t("10 Mo par fichier", "10 MB per file")}
         </p>
         <button
-          disabled={loading || files.length === 3}
+          disabled={loading || (maxFiles !== null && files.length >= maxFiles)}
           onClick={() => {
             replacing.current = null;
             if (input.current) input.current.multiple = true;
@@ -160,7 +213,7 @@ export function DocumentLibrary({
           ref={input}
           type="file"
           multiple
-          accept=".pdf,.doc,.docx"
+          accept={extensions.map((ext) => `.${ext}`).join(",")}
           aria-label={inputLabel}
           className="sr-only"
           onChange={(e) => void upload(Array.from(e.target.files ?? []))}

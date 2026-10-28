@@ -13,12 +13,15 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [resumes, setResumes] = useState<{ file: File; url: string }[]>([]);
   const [englishResumes, setEnglishResumes] = useState<Resume[]>([]);
   const [coverLetters, setCoverLetters] = useState<Resume[]>([]);
+  const [additionalDocuments, setAdditionalDocuments] = useState<Resume[]>([]);
   const urls = useRef(new Set<string>());
   useEffect(() => {
-    const current = new Set([...resumes, ...englishResumes, ...coverLetters].map((r) => r.url));
+    const current = new Set(
+      [...resumes, ...englishResumes, ...coverLetters, ...additionalDocuments].map((r) => r.url),
+    );
     for (const url of urls.current) if (!current.has(url)) URL.revokeObjectURL(url);
     urls.current = current;
-  }, [resumes, englishResumes, coverLetters]);
+  }, [resumes, englishResumes, coverLetters, additionalDocuments]);
   useEffect(
     () => () => {
       for (const url of urls.current) URL.revokeObjectURL(url);
@@ -48,6 +51,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         setEnglishResumes,
         coverLetters,
         setCoverLetters,
+        additionalDocuments,
+        setAdditionalDocuments,
         resumes,
         setResumes,
         resume,
