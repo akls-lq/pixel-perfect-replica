@@ -1,3 +1,4 @@
+import { CompanyLogos } from "@/components/landing/CompanyLogos";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Check, ShieldCheck, Sparkles, Target, Trophy } from "lucide-react";
 import { useState } from "react";
@@ -72,6 +73,7 @@ function Index() {
           </p>
         </div>
       </section>
+      <CompanyLogos />
       <OffersSection search={search} onReset={() => setSearch(initialSearch)} />
       <section id="fonctionnalites" className="border-y bg-ink text-ink-foreground">
         <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 md:grid-cols-3">
