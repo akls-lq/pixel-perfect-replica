@@ -1,3 +1,4 @@
+import { usePreferences } from "@/components/preferences/usePreferences";
 import { useEffect, useState } from "react";
 import { ExternalLink } from "lucide-react";
 export function DocumentPreview({
@@ -9,6 +10,7 @@ export function DocumentPreview({
   example: string;
   label: string;
 }) {
+  const { t } = usePreferences();
   const [url, setUrl] = useState("");
   const [text, setText] = useState("");
   const [error, setError] = useState("");
@@ -32,23 +34,32 @@ export function DocumentPreview({
           if (!cancelled) setText(t);
         })
         .catch(() => {
-          if (!cancelled) setError("Aperçu texte indisponible. Tu peux télécharger le fichier.");
+          if (!cancelled)
+            setError(
+              t(
+                "Aperçu texte indisponible. Tu peux télécharger le fichier.",
+                "Text preview unavailable. You can download the file.",
+              ),
+            );
         });
     return () => {
       cancelled = true;
       URL.revokeObjectURL(href);
     };
-  }, [file]);
+  }, [file, t]);
   return (
     <details className="mt-3 rounded-lg bg-background p-3 text-xs">
-      <summary className="cursor-pointer font-bold text-primary-text">Consulter {label}</summary>
+      <summary className="cursor-pointer font-bold text-primary-text">
+        {t("Consulter", "View")}
+        {label}
+      </summary>
       {!file ? (
         <pre className="mt-3 whitespace-pre-wrap font-sans leading-relaxed">{example}</pre>
       ) : (
         <div className="mt-3">
           {file.name.toLowerCase().endsWith(".txt") && (
             <pre className="max-h-72 overflow-y-auto whitespace-pre-wrap break-words font-sans leading-relaxed">
-              {text || (!error ? "Chargement de l’aperçu…" : "")}
+              {text || (!error ? t("Chargement de l’aperçu…", "Loading preview…") : "")}
             </pre>
           )}
           {error && <p role="alert">{error}</p>}
@@ -59,7 +70,8 @@ export function DocumentPreview({
               rel="noopener noreferrer"
               className="mt-2 inline-flex items-center gap-2 font-bold text-primary-text"
             >
-              Ouvrir le document local <ExternalLink size={13} />
+              {t("Ouvrir le document local", "Open local document")}
+              <ExternalLink size={13} />
             </a>
           )}
         </div>

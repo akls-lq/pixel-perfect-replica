@@ -1,6 +1,6 @@
 import { Context } from "./useWorkspace";
 import { accountSamples } from "@/lib/account-data";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { initialApplications } from "@/lib/workspace-data";
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [accounts, setAccounts] = useState(accountSamples);
@@ -10,13 +10,22 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [applications, setApplications] = useState(initialApplications);
   const [saved, setSaved] = useState<string[]>([]);
   const [reviewed, setReviewed] = useState<string[]>([]);
-  const [resume, setResume] = useState<{ file: File; url: string } | null>(null);
+  const [resumes, setResumes] = useState<{ file: File; url: string }[]>([]);
+  const urls = useRef(new Set<string>());
+  useEffect(() => {
+    const current = new Set(resumes.map((r) => r.url));
+    for (const url of urls.current) if (!current.has(url)) URL.revokeObjectURL(url);
+    urls.current = current;
+  }, [resumes]);
   useEffect(
     () => () => {
-      if (resume) URL.revokeObjectURL(resume.url);
+      for (const url of urls.current) URL.revokeObjectURL(url);
     },
-    [resume],
+    [],
   );
+  const resume = resumes[0] ?? null;
+  const setResume = (next: { file: File; url: string } | null) =>
+    setResumes((xs) => (next ? [next, ...xs.slice(1)] : xs.slice(1)));
   return (
     <Context.Provider
       value={{
@@ -33,6 +42,8 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
           setSaved((xs) => (xs.includes(id) ? xs.filter((x) => x !== id) : [...xs, id])),
         reviewed,
         reviewJob: (id) => setReviewed((xs) => (xs.includes(id) ? xs : [...xs, id])),
+        resumes,
+        setResumes,
         resume,
         setResume,
       }}

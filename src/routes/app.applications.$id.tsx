@@ -1,3 +1,4 @@
+import { usePreferences } from "@/components/preferences/usePreferences";
 import { DocumentPreview } from "@/components/workspace/DocumentPreview";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
@@ -14,6 +15,7 @@ function ApplicationPage() {
   return <ApplicationDetail key={id} id={id} />;
 }
 function ApplicationDetail({ id }: { id: string }) {
+  const { t } = usePreferences();
   const { applications, updateApplication, resume, documentFiles, attachFile } = useWorkspace();
   const a = applications.find((x) => x.id === id);
   const [url, setUrl] = useState(a?.sourceUrl ?? "");
@@ -22,9 +24,9 @@ function ApplicationDetail({ id }: { id: string }) {
   const [error, setError] = useState("");
   if (!a)
     return (
-      <EmptyState title="Ce dossier n’existe pas.">
+      <EmptyState title={t("Ce dossier n’existe pas.", "This application does not exist.")}>
         <Link to="/app/applications" className="text-primary-text">
-          Revenir au suivi
+          {t("Revenir au suivi", "Back to applications")}
         </Link>
       </EmptyState>
     );
@@ -53,19 +55,36 @@ function ApplicationDetail({ id }: { id: string }) {
       file.size > 10 * 1024 * 1024 ||
       !file.name.toLowerCase().match(/\.(pdf|txt)$/)
     ) {
-      setError("La lettre doit être un PDF ou un TXT non vide, de 10 Mo maximum.");
+      setError(
+        t(
+          "La lettre doit être un PDF ou un TXT non vide, de 10 Mo maximum.",
+          "The letter must be a non-empty PDF or TXT file, up to 10 MB.",
+        ),
+      );
       return;
     }
     try {
       if (file.name.toLowerCase().endsWith(".pdf") && (await file.slice(0, 5).text()) !== "%PDF-") {
-        setError("Le fichier choisi n’est pas un PDF valide.");
+        setError(
+          t("Le fichier choisi n’est pas un PDF valide.", "The selected file is not a valid PDF."),
+        );
         return;
       }
       attachFile(id, "letter", file);
       updateApplication(id, { letterName: file.name });
-      setMessage("Lettre rattachée localement à ce dossier, sans envoi.");
+      setMessage(
+        t(
+          "Lettre rattachée localement à ce dossier, sans envoi.",
+          "Letter attached locally to this record, without sending.",
+        ),
+      );
     } catch {
-      setError("Impossible de lire ce fichier. Réessaie avec un fichier local accessible.");
+      setError(
+        t(
+          "Impossible de lire ce fichier. Réessaie avec un fichier local accessible.",
+          "Unable to read this file. Try an accessible local file.",
+        ),
+      );
     }
   }
   return (
@@ -74,12 +93,13 @@ function ApplicationDetail({ id }: { id: string }) {
         to="/app/applications"
         className="mb-5 inline-flex items-center gap-2 text-sm font-bold text-primary-text"
       >
-        <ArrowLeft size={16} /> Tous mes dossiers
+        <ArrowLeft size={16} />
+        {t("Tous mes dossiers", "All my applications")}
       </Link>
       <PageTitle
-        eyebrow={`DOSSIER ${id.toUpperCase()} · EXEMPLE FICTIF`}
+        eyebrow={`${t("DOSSIER", "RECORD")} ${id.toUpperCase()} · ${t("EXEMPLE FICTIF", "FICTIONAL EXAMPLE")}`}
         title={a.title}
-        description={`${a.company} · ${a.sector} · Candidature d’exemple du ${formatDate(a.sentAt)}`}
+        description={`${a.company} · ${a.sector} · ${t("Candidature d’exemple du", "Example application dated")} ${formatDate(a.sentAt)}`}
       >
         <StageBadge stage={a.stage} />
       </PageTitle>
@@ -97,11 +117,14 @@ function ApplicationDetail({ id }: { id: string }) {
         <div className="space-y-5">
           <section className="panel">
             <h2 className="flex items-center gap-2 font-bold">
-              <Link2 size={19} className="text-primary-text" /> Le lien de l’offre
+              <Link2 size={19} className="text-primary-text" />
+              {t("Le lien de l’offre", "Job listing link")}
             </h2>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Aucune annonce réelle n’est associée à ce dossier fictif. Ajoute une URL pour tester
-              l’ouverture de l’offre d’origine.
+              {t(
+                "Aucune annonce réelle n’est associée à ce dossier fictif. Ajoute une URL pour tester l’ouverture de l’offre d’origine.",
+                "No real listing is associated with this fictional record. Add a URL to test opening the original listing.",
+              )}
             </p>
             <form
               className="mt-4"
@@ -110,15 +133,20 @@ function ApplicationDetail({ id }: { id: string }) {
                 setMessage("");
                 setError("");
                 if (url && !safeUrl(url)) {
-                  setError("Saisis une URL complète commençant par https:// ou http://.");
+                  setError(
+                    t(
+                      "Saisis une URL complète commençant par https:// ou http://.",
+                      "Enter a full URL starting with https:// or http://.",
+                    ),
+                  );
                   return;
                 }
                 updateApplication(id, { sourceUrl: url.trim() });
-                setMessage("Lien enregistré dans cette session.");
+                setMessage(t("Lien enregistré dans cette session.", "Link saved in this session."));
               }}
             >
               <label className="text-xs font-bold">
-                URL de l’offre
+                {t("URL de l’offre", "Job listing URL")}
                 <input
                   className="field"
                   value={url}
@@ -131,7 +159,7 @@ function ApplicationDetail({ id }: { id: string }) {
                 type="submit"
                 className="mt-3 rounded-lg border px-4 py-2 text-sm font-bold hover:bg-secondary"
               >
-                Enregistrer le lien
+                {t("Enregistrer le lien", "Save link")}
               </button>
             </form>
             {safeUrl(a.sourceUrl) && (
@@ -141,18 +169,23 @@ function ApplicationDetail({ id }: { id: string }) {
                 rel="noopener noreferrer"
                 className="btn-primary mt-4"
               >
-                Ouvrir l’offre d’origine <ExternalLink size={15} />
+                {t("Ouvrir l’offre d’origine", "Open original listing")}
+                <ExternalLink size={15} />
               </a>
             )}
             <Link to="/app/offers" className="mt-4 block text-xs font-bold text-primary-text">
-              Retrouver le catalogue de démonstration →
+              {t("Retrouver le catalogue de démonstration →", "Browse the demo catalogue →")}
             </Link>
           </section>
           <section className="panel">
-            <h2 className="font-bold">Les documents de ce dossier</h2>
+            <h2 className="font-bold">
+              {t("Les documents de ce dossier", "Documents for this application")}
+            </h2>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-              Les pièces initiales sont des exemples TXT téléchargeables. Un fichier ajouté
-              manuellement reste local : il n’est pas présenté comme un document déjà envoyé.
+              {t(
+                "Les pièces initiales sont des exemples TXT téléchargeables. Un fichier ajouté manuellement reste local : il n’est pas présenté comme un document déjà envoyé.",
+                "Initial attachments are downloadable TXT examples. Files added manually remain local and are not presented as already sent.",
+              )}
             </p>
             <div className="mt-5 space-y-3">
               {(["cv", "letter"] as const).map((kind) => (
@@ -161,23 +194,25 @@ function ApplicationDetail({ id }: { id: string }) {
                     <FileText className="shrink-0 text-primary-text" size={23} />
                     <div className="min-w-0 flex-1">
                       <h3 className="text-sm font-bold">
-                        {kind === "cv" ? "CV rattaché" : "Lettre de motivation"}
+                        {kind === "cv"
+                          ? t("CV rattaché", "Attached CV")
+                          : t("Lettre de motivation", "Cover letter")}
                       </h3>
                       <p className="mt-1 break-all text-xs text-muted-foreground">
                         {kind === "cv" ? a.cvName : a.letterName}
                       </p>
                       <span className="mt-2 inline-block rounded-full bg-secondary px-2 py-1 text-[10px] font-bold">
                         {files?.[kind]
-                          ? "Ajouté localement · Non envoyé"
-                          : "Document fictif · Jamais envoyé"}
+                          ? t("Ajouté localement · Non envoyé", "Added locally · Not sent")
+                          : t("Document fictif · Jamais envoyé", "Fictional document · Never sent")}
                       </span>
                     </div>
                     <button
                       onClick={() => download(kind)}
                       aria-label={
                         kind === "cv"
-                          ? "Télécharger le CV rattaché"
-                          : "Télécharger la lettre rattachée"
+                          ? t("Télécharger le CV rattaché", "Download attached CV")
+                          : t("Télécharger la lettre rattachée", "Download attached letter")
                       }
                       className="rounded-lg border p-2 text-primary-text"
                     >
@@ -186,7 +221,11 @@ function ApplicationDetail({ id }: { id: string }) {
                   </div>
                   <DocumentPreview
                     file={files?.[kind]}
-                    label={kind === "cv" ? "le CV rattaché" : "la lettre rattachée"}
+                    label={
+                      kind === "cv"
+                        ? t("le CV rattaché", "the attached CV")
+                        : t("la lettre rattachée", "the attached letter")
+                    }
                     example={exampleText(kind)}
                   />
                   {kind === "cv" ? (
@@ -196,21 +235,30 @@ function ApplicationDetail({ id }: { id: string }) {
                           onClick={() => {
                             attachFile(id, "cv", resume.file);
                             updateApplication(id, { cvName: resume.file.name });
-                            setMessage("CV rattaché localement à ce dossier, sans envoi.");
+                            setMessage(
+                              t(
+                                "CV rattaché localement à ce dossier, sans envoi.",
+                                "CV attached locally to this record, without sending.",
+                              ),
+                            );
                           }}
                           className="text-xs font-bold text-primary-text"
                         >
-                          Rattacher mon CV de la session : {resume.file.name}
+                          {t("Rattacher mon CV de la session :", "Attach my session CV:")}
+                          {resume.file.name}
                         </button>
                       ) : (
                         <Link to="/app/cv-studio" className="text-xs font-bold text-primary-text">
-                          Ajouter mon CV dans CV Studio →
+                          {t("Ajouter mon CV dans CV Studio →", "Add my CV in the CV library →")}
                         </Link>
                       )}
                     </div>
                   ) : (
                     <label className="mt-4 block border-t pt-3 text-xs font-bold text-primary-text">
-                      Ajouter / remplacer la lettre (PDF ou TXT)
+                      {t(
+                        "Ajouter / remplacer la lettre (PDF ou TXT)",
+                        "Add / replace letter (PDF or TXT)",
+                      )}
                       <input
                         type="file"
                         accept=".pdf,.txt"
@@ -231,11 +279,13 @@ function ApplicationDetail({ id }: { id: string }) {
             onSubmit={(e) => {
               e.preventDefault();
               updateApplication(id, { notes });
-              setMessage("Notes enregistrées dans cette session.");
+              setMessage(
+                t("Notes enregistrées dans cette session.", "Notes saved in this session."),
+              );
             }}
           >
             <label className="font-bold">
-              Mes notes
+              {t("Mes notes", "My notes")}
               <textarea
                 className="field min-h-32 text-sm"
                 value={notes}
@@ -244,15 +294,15 @@ function ApplicationDetail({ id }: { id: string }) {
               />
             </label>
             <button className="btn-primary mt-3" type="submit">
-              Enregistrer mes notes
+              {t("Enregistrer mes notes", "Save my notes")}
             </button>
           </form>
         </div>
         <aside className="space-y-5">
           <section className="panel">
-            <h2 className="font-bold">L’avancement du processus</h2>
+            <h2 className="font-bold">{t("L’avancement du processus", "Application progress")}</h2>
             <label className="mt-5 block text-xs font-bold">
-              Statut actuel
+              {t("Statut actuel", "Current status")}
               <select
                 className="field"
                 value={a.stage}
@@ -264,12 +314,26 @@ function ApplicationDetail({ id }: { id: string }) {
                       stage === "Envoyée" ? null : (a.responseAt ?? demoDate.toISOString()),
                   });
                   setMessage(
-                    "Statut mis à jour localement. Les graphiques de l’accueil reflètent ce changement.",
+                    t(
+                      "Statut mis à jour localement. Les graphiques de l’accueil reflètent ce changement.",
+                      "Status updated locally. Dashboard charts reflect this change.",
+                    ),
                   );
                 }}
               >
                 {stages.map((s) => (
-                  <option key={s}>{s}</option>
+                  <option key={s} value={s}>
+                    {t(
+                      s,
+                      {
+                        Envoyée: "Submitted",
+                        "Réponse reçue": "Reply received",
+                        Entretien: "Interview",
+                        "Offre reçue": "Offer received",
+                        Refusée: "Rejected",
+                      }[s],
+                    )}
+                  </option>
                 ))}
               </select>
             </label>
@@ -279,18 +343,25 @@ function ApplicationDetail({ id }: { id: string }) {
                 checked={a.email}
                 onChange={(e) => updateApplication(id, { email: e.target.checked })}
               />
-              <Mail size={16} /> Un email a été reçu
+              <Mail size={16} />
+              {t("Un email a été reçu", "An email was received")}
             </label>
             <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
-              Indication manuelle dans la démo. Aucun accès Gmail, Outlook ou autre messagerie.
+              {t(
+                "Indication manuelle dans la démo. Aucun accès Gmail, Outlook ou autre messagerie.",
+                "Manually reported in this demo. No access to Gmail, Outlook or other email services.",
+              )}
             </p>
             <div className="mt-6 space-y-4 border-t pt-5">
               <div className="flex gap-3">
                 <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-primary" />
                 <div>
-                  <h3 className="text-xs font-bold">Envoi d’exemple</h3>
+                  <h3 className="text-xs font-bold">
+                    {t("Envoi d’exemple", "Example submission")}
+                  </h3>
                   <p className="mt-1 text-xs text-muted-foreground">
-                    {formatDate(a.sentAt)} · Simulation
+                    {formatDate(a.sentAt)}
+                    {t("· Simulation", "· Simulation")}
                   </p>
                 </div>
               </div>
@@ -298,7 +369,9 @@ function ApplicationDetail({ id }: { id: string }) {
                 <div className="flex gap-3">
                   <Check size={14} className="text-teal-700" />
                   <div>
-                    <h3 className="text-xs font-bold">Réponse renseignée</h3>
+                    <h3 className="text-xs font-bold">
+                      {t("Réponse renseignée", "Reply reported")}
+                    </h3>
                     <p className="mt-1 text-xs text-muted-foreground">
                       {formatDate(a.responseAt)} · {a.stage}
                     </p>
@@ -308,10 +381,14 @@ function ApplicationDetail({ id }: { id: string }) {
             </div>
           </section>
           <section className="rounded-2xl bg-ink p-5 text-white">
-            <h2 className="text-sm font-bold">Le détail fait la différence.</h2>
+            <h2 className="text-sm font-bold">
+              {t("Le détail fait la différence.", "Details make a difference.")}
+            </h2>
             <p className="mt-3 text-xs leading-relaxed text-ink-muted">
-              Garde une trace du poste, du lien source et des pièces utilisées. Ici, tout est un bac
-              à sable ; les documents initiaux n’ont jamais été envoyés.
+              {t(
+                "Garde une trace du poste, du lien source et des pièces utilisées. Ici, tout est un bac à sable ; les documents initiaux n’ont jamais été envoyés.",
+                "Keep a record of the job, source link and attachments. This is a sandbox; the initial documents were never sent.",
+              )}
             </p>
           </section>
         </aside>

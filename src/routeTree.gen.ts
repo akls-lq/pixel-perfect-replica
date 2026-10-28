@@ -23,6 +23,8 @@ import { Route as AppApplicationsRouteImport } from './routes/app.applications'
 import { Route as AppCvStudioRouteImport } from './routes/app.cv-studio'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AppOffersRouteImport } from './routes/app.offers'
+import { Route as AppProfileRouteImport } from './routes/app.profile'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppApplicationsIndexRouteImport } from './routes/app.applications.index'
 import { Route as AppApplicationsIdRouteImport } from './routes/app.applications.$id'
 
@@ -96,6 +98,16 @@ const AppOffersRoute = AppOffersRouteImport.update({
   path: '/offers',
   getParentRoute: () => AppRoute,
 } as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppApplicationsIndexRoute = AppApplicationsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -122,6 +134,8 @@ export interface FileRoutesByFullPath {
   '/app/cv-studio': typeof AppCvStudioRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/offers': typeof AppOffersRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/applications/$id': typeof AppApplicationsIdRoute
   '/app/applications/': typeof AppApplicationsIndexRoute
 }
@@ -139,6 +153,8 @@ export interface FileRoutesByTo {
   '/app/cv-studio': typeof AppCvStudioRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/offers': typeof AppOffersRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/applications/$id': typeof AppApplicationsIdRoute
   '/app/applications': typeof AppApplicationsIndexRoute
 }
@@ -158,6 +174,8 @@ export interface FileRoutesById {
   '/app/cv-studio': typeof AppCvStudioRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/offers': typeof AppOffersRoute
+  '/app/profile': typeof AppProfileRoute
+  '/app/settings': typeof AppSettingsRoute
   '/app/applications/$id': typeof AppApplicationsIdRoute
   '/app/applications/': typeof AppApplicationsIndexRoute
 }
@@ -178,6 +196,8 @@ export interface FileRouteTypes {
     | '/app/cv-studio'
     | '/app/dashboard'
     | '/app/offers'
+    | '/app/profile'
+    | '/app/settings'
     | '/app/applications/$id'
     | '/app/applications/'
   fileRoutesByTo: FileRoutesByTo
@@ -195,6 +215,8 @@ export interface FileRouteTypes {
     | '/app/cv-studio'
     | '/app/dashboard'
     | '/app/offers'
+    | '/app/profile'
+    | '/app/settings'
     | '/app/applications/$id'
     | '/app/applications'
   id:
@@ -213,6 +235,8 @@ export interface FileRouteTypes {
     | '/app/cv-studio'
     | '/app/dashboard'
     | '/app/offers'
+    | '/app/profile'
+    | '/app/settings'
     | '/app/applications/$id'
     | '/app/applications/'
   fileRoutesById: FileRoutesById
@@ -329,6 +353,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOffersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/profile': {
+      id: '/app/profile'
+      path: '/profile'
+      fullPath: '/app/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/applications/': {
       id: '/app/applications/'
       path: '/'
@@ -366,6 +404,8 @@ interface AppRouteChildren {
   AppCvStudioRoute: typeof AppCvStudioRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppOffersRoute: typeof AppOffersRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppSettingsRoute: typeof AppSettingsRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -374,6 +414,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppCvStudioRoute: AppCvStudioRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppOffersRoute: AppOffersRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppSettingsRoute: AppSettingsRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

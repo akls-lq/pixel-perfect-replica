@@ -1,3 +1,5 @@
+import { PreferencesProvider } from "@/components/preferences/PreferencesProvider";
+import { RunningLoader } from "@/components/workspace/RunningLoader";
 import { WorkspaceProvider } from "@/components/workspace/WorkspaceContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
@@ -98,6 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
+  pendingComponent: RunningLoader,
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
@@ -123,10 +126,12 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <WorkspaceProvider><Outlet /></WorkspaceProvider> breaks all child routes. */}
-      <WorkspaceProvider>
-        <Outlet />
-      </WorkspaceProvider>
+      {/* Required: nested routes render here. Removing <PreferencesProvider><WorkspaceProvider><Outlet /></WorkspaceProvider></PreferencesProvider> breaks all child routes. */}
+      <PreferencesProvider>
+        <WorkspaceProvider>
+          <Outlet />
+        </WorkspaceProvider>
+      </PreferencesProvider>
     </QueryClientProvider>
   );
 }

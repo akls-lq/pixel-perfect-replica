@@ -1,469 +1,337 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import * as Popover from "@radix-ui/react-popover";
 import {
   Search,
+  BriefcaseBusiness,
   MapPin,
-  ChevronDown,
   SlidersHorizontal,
-  Bot,
+  ChevronDown,
+  X,
   Bookmark,
   ArrowUpRight,
-  Check,
-  ShieldCheck,
+  Bot,
 } from "lucide-react";
-import { jobs, filterJobs, emptyFilters, type JobFilters } from "@/lib/workspace-data";
+import { usePreferences } from "@/components/preferences/usePreferences";
 import { useWorkspace } from "@/components/workspace/useWorkspace";
+import { FilterModal } from "@/components/workspace/FilterModal";
+import {
+  emptyCriteria,
+  restoreCriteria,
+  options,
+  futureMonths,
+  selectDemoJobs,
+  type Group,
+  type SearchCriteria,
+} from "@/lib/autopilot-data";
 import { PageTitle, EmptyState } from "@/components/workspace/Shared";
-export const Route = createFileRoute("/app/offers")({
-  head: () => ({ meta: [{ title: "Offres et Autopilot — Crétoria" }] }),
-  component: Offers,
-});
-function Offers() {
-  const [filters, setFilters] = useState<JobFilters>(emptyFilters);
-  const [sort, setSort] = useState("match");
-  const [savedOnly, setSavedOnly] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
-  const [simulation, setSimulation] = useState(false);
+export const Route = createFileRoute("/app/offers")({ component: Autopilot });
+function Autopilot() {
+  const { t, language } = usePreferences();
   const { saved, toggleSaved, reviewJob } = useWorkspace();
-  const set = <K extends keyof JobFilters>(key: K, value: JobFilters[K]) => {
-    setFilters((f) => ({ ...f, [key]: value }));
-    setSimulation(false);
+  const [criteria, setCriteria] = useState<SearchCriteria>(emptyCriteria);
+  const [ready, setReady] = useState(false);
+  const [storageError, setStorageError] = useState(false);
+  const [modal, setModal] = useState(false);
+  const [result, setResult] = useState(false);
+  const [focused, setFocused] = useState<string | null>(null);
+  useEffect(() => {
+    try {
+      setCriteria(restoreCriteria(JSON.parse(localStorage.getItem("cretoria.criteria") || "{}")));
+    } catch {
+      setStorageError(true);
+    }
+    setReady(true);
+  }, []);
+  useEffect(() => {
+    if (ready)
+      try {
+        localStorage.setItem("cretoria.criteria", JSON.stringify(criteria));
+      } catch {
+        setStorageError(true);
+      }
+    setResult(false);
+  }, [criteria, ready]);
+  const set = (next: SearchCriteria) => {
+    setCriteria(next);
+    setResult(false);
   };
-  const results = useMemo(
-    () =>
-      filterJobs(jobs, filters)
-        .filter((j) => !savedOnly || saved.includes(j.id))
-        .sort((a, b) =>
-          sort === "recent"
-            ? a.publishedDays - b.publishedDays
-            : sort === "salary"
-              ? b.salary - a.salary
-              : b.score - a.score,
-        ),
-    [filters, savedOnly, saved, sort],
+  const selected = selectDemoJobs(criteria);
+  const active = selected.find((j) => j.id === focused) ?? selected[0];
+  const months = futureMonths(new Date());
+  const chips = (
+    Object.keys(emptyCriteria).filter((k) => k !== "q" && k !== "city") as Group[]
+  ).flatMap((group) =>
+    criteria[group].map((value) => ({
+      group,
+      value,
+      label:
+        group === "start"
+          ? value === "asap"
+            ? t("Dès que possible", "As soon as possible")
+            : months.find((m) => m.value === value)
+              ? t(
+                  months.find((m) => m.value === value)!.fr,
+                  months.find((m) => m.value === value)!.en,
+                )
+              : value
+          : t(
+              options(group).find((o) => o.value === value)?.fr ?? value,
+              options(group).find((o) => o.value === value)?.en ?? value,
+            ),
+    })),
   );
-  const active = results.find((j) => j.id === focused) ?? results[0];
-  const activeCount = Object.entries(filters).filter(
-    ([k, v]) => k !== "autopilot" && v !== "" && v !== false,
-  ).length;
-  const selects: { key: keyof JobFilters; label: string; options: string[]; values?: string[] }[] =
-    [
-      {
-        key: "sector",
-        label: "Secteur d’activité",
-        options: [...new Set(jobs.map((j) => j.sector))],
-      },
-      { key: "remote", label: "Mode de travail", options: ["Sur site", "Hybride", "Télétravail"] },
-      {
-        key: "salary",
-        label: "Salaire annuel brut minimum",
-        options: ["20 000 €", "35 000 €", "45 000 €", "60 000 €"],
-        values: ["20000", "35000", "45000", "60000"],
-      },
-      {
-        key: "experience",
-        label: "Expérience requise au maximum",
-        options: ["Débutant · 0 an", "1 an", "2 ans", "3 ans", "5 ans"],
-        values: ["0", "1", "2", "3", "5"],
-      },
-      {
-        key: "duration",
-        label: "Durée du contrat",
-        options: ["Sans terme · CDI", "3 mois", "6 mois", "9 mois", "12 mois"],
-        values: ["0", "3", "6", "9", "12"],
-      },
-      { key: "hours", label: "Temps de travail", options: ["Temps plein", "Temps partiel"] },
-      {
-        key: "education",
-        label: "Diplôme demandé",
-        options: ["Sans exigence", "Bac +3", "Bac +5"],
-      },
-      { key: "language", label: "Langue demandée", options: ["Français", "Anglais"] },
-      {
-        key: "published",
-        label: "Offres publiées depuis",
-        options: ["24 heures", "3 jours", "7 jours", "30 jours"],
-        values: ["1", "3", "7", "30"],
-      },
-      {
-        key: "minScore",
-        label: "Compatibilité illustrative minimum",
-        options: ["60 %", "75 %", "85 %", "90 %"],
-        values: ["60", "75", "85", "90"],
-      },
-    ];
   return (
     <>
       <PageTitle
-        eyebrow="DES OPPORTUNITÉS QUI TE RESSEMBLENT"
-        title="La bonne offre. Les bons critères."
-        description="Affine ta recherche et découvre pourquoi une opportunité pourrait te correspondre. Toutes les offres et leurs scores sont fictifs."
+        eyebrow={t("UNE RECHERCHE À TON IMAGE", "SEARCH, YOUR WAY")}
+        title={t("Configurons ta prochaine opportunité.", "Let’s find your next opportunity.")}
+        description={t(
+          "Les bons critères, une sélection à relire. L’Autopilote reste entièrement sous ton contrôle.",
+          "The right criteria, a shortlist to review. You stay in control of Autopilot.",
+        )}
       />
-      <section className="panel">
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            document
-              .getElementById("job-results")
-              ?.scrollIntoView({ behavior: "smooth", block: "start" });
-          }}
-        >
-          <div className="grid items-end gap-3 md:grid-cols-[1.5fr_1fr_1fr_auto]">
-            <label className="text-xs font-bold">
-              <span className="flex gap-1.5">
-                <Search size={14} /> Métier ou compétence
-              </span>
-              <input
-                className="field"
-                value={filters.q}
-                onChange={(e) => set("q", e.target.value)}
-                placeholder="Designer, React, marketing…"
-              />
-            </label>
-            <label className="text-xs font-bold">
-              <span className="flex gap-1.5">
-                <MapPin size={14} /> Lieu de résidence / ville visée
-              </span>
-              <input
-                className="field"
-                value={filters.city}
-                onChange={(e) => set("city", e.target.value)}
-                placeholder="Paris, Lyon…"
-              />
-            </label>
-            <label className="text-xs font-bold">
-              Type de contrat
-              <select
-                className="field"
-                value={filters.contract}
-                onChange={(e) => set("contract", e.target.value)}
-              >
-                <option value="">Tous les contrats</option>
-                {["CDI", "CDD", "Stage", "Alternance", "Freelance", "Intérim"].map((c) => (
-                  <option key={c}>{c}</option>
-                ))}
-              </select>
-            </label>
-            <button type="submit" className="btn-primary h-[50px]">
-              <Search size={16} /> Rechercher
-            </button>
-          </div>
-        </form>
-        <details className="group mt-5 border-t pt-4">
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-bold">
-            <span className="flex items-center gap-2">
-              <SlidersHorizontal size={17} className="text-primary-text" /> Filtres avancés &
-              Autopilot{" "}
-              <span className="rounded-full bg-secondary px-2 py-0.5 text-xs">
-                {activeCount} actif{activeCount > 1 ? "s" : ""}
-              </span>
-            </span>
-            <ChevronDown size={18} className="transition group-open:rotate-180" />
-          </summary>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Tous les critères se combinent. Les options non renseignées restent ouvertes.
-          </p>
-          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {selects.map((s) => (
-              <label key={s.key} className="text-xs font-bold">
-                {s.label}
-                <select
-                  value={String(filters[s.key])}
-                  onChange={(e) => set(s.key, e.target.value as never)}
-                  className="field"
-                >
-                  <option value="">Indifférent</option>
-                  {s.options.map((o, i) => (
-                    <option key={o} value={s.values?.[i] ?? o}>
-                      {o}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
-            <label className="text-xs font-bold">
-              Mois de prise de poste
-              <input
-                aria-label="Mois de prise de poste"
-                className="field"
-                type="month"
-                value={filters.startMonth}
-                onChange={(e) => set("startMonth", e.target.value)}
-              />
-              <span className="mt-1 block font-normal text-muted-foreground">
-                Exemples disponibles : janvier, mars et avril 2027.
-              </span>
-            </label>
-            <label className="text-xs font-bold">
-              Compétences indispensables
-              <input
-                className="field"
-                value={filters.skills}
-                onChange={(e) => set("skills", e.target.value)}
-                placeholder="React, TypeScript"
-              />
-              <span className="mt-1 block font-normal text-muted-foreground">
-                Séparer les compétences par des virgules.
-              </span>
-            </label>
-            <label className="text-xs font-bold">
-              Exclure des mots-clés ou entreprises
-              <input
-                className="field"
-                value={filters.exclude}
-                onChange={(e) => set("exclude", e.target.value)}
-                placeholder="Finance, Studio Halo…"
-              />
-            </label>
-          </div>
-          <div className="my-5 flex flex-wrap gap-5 text-sm">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={filters.asap}
-                onChange={(e) => set("asap", e.target.checked)}
-              />{" "}
-              Prise de poste dès que possible
-            </label>
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                checked={filters.accessible}
-                onChange={(e) => set("accessible", e.target.checked)}
-              />{" "}
-              Accessibilité du poste renseignée
-            </label>
-          </div>
-          <div className="rounded-xl border border-primary/20 bg-primary/5 p-5">
-            <div className="flex items-start gap-3">
-              <Bot className="shrink-0 text-primary-text" />
-              <div>
-                <h2 className="text-sm font-bold">Autopilot · Préparer une sélection</h2>
-                <p className="mt-2 max-w-3xl text-xs leading-relaxed text-muted-foreground">
-                  L’Autopilot utilise les critères ci-dessus pour te proposer une liste à relire.
-                  Cette simulation ne lance aucune recherche externe, ne génère aucun document et
-                  n’envoie aucune candidature.
-                </p>
-              </div>
-            </div>
-            <label className="mt-4 flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
-                checked={filters.autopilot}
-                onChange={(e) => set("autopilot", e.target.checked)}
-              />{" "}
-              Utiliser ces critères pour ma simulation Autopilot
-            </label>
-            <button
-              disabled={!filters.autopilot}
-              onClick={() => setSimulation(true)}
-              className="btn-primary mt-4"
-            >
-              <Bot size={16} /> Simuler ma sélection
-            </button>
-            {simulation && (
-              <p role="status" className="mt-3 flex items-center gap-2 text-sm">
-                <Check size={16} /> {results.length} offre{results.length > 1 ? "s" : ""} fictive
-                {results.length > 1 ? "s" : ""} sélectionnée{results.length > 1 ? "s" : ""}. Aucun
-                envoi effectué.
-              </p>
-            )}
-          </div>
-        </details>
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4">
-          <label className="flex items-center gap-2 text-xs font-semibold">
+      <section className="panel !p-4 md:!p-6">
+        <div className="grid items-center gap-1 rounded-2xl border bg-background/40 p-2 md:grid-cols-[1.3fr_.8fr_1fr] md:divide-x">
+          <label className="flex items-center gap-3 px-3 py-3">
+            <Search size={18} className="shrink-0 text-muted-foreground" />
             <input
-              type="checkbox"
-              checked={savedOnly}
-              onChange={(e) => setSavedOnly(e.target.checked)}
-            />{" "}
-            Mes offres sauvegardées ({saved.length})
+              aria-label={t("Mots-clés ou entreprise", "Keywords or company")}
+              value={criteria.q}
+              onChange={(e) => set({ ...criteria, q: e.target.value })}
+              className="w-full min-w-0 bg-transparent text-sm outline-none"
+              placeholder={t("Offre, entreprise ou mot-clé…", "Job, company or keyword…")}
+            />
           </label>
-          <button
-            onClick={() => {
-              setFilters(emptyFilters);
-              setSavedOnly(false);
-              setSimulation(false);
-            }}
-            className="text-xs font-bold text-primary-text"
-          >
-            Réinitialiser les filtres
-          </button>
-        </div>
-      </section>
-      <section id="job-results" className="scroll-mt-44 pt-7">
-        <div className="mb-5 flex items-center justify-between gap-3">
-          <h2 aria-live="polite" className="font-bold">
-            {results.length} opportunité{results.length > 1 ? "s" : ""}{" "}
-            <span className="text-sm font-normal text-muted-foreground">· Démonstration</span>
-          </h2>
-          <label className="text-xs">
-            Trier par{" "}
-            <select
-              className="ml-2 rounded-lg border bg-card p-2"
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-            >
-              <option value="match">Compatibilité</option>
-              <option value="recent">Plus récentes</option>
-              <option value="salary">Salaire</option>
-            </select>
-          </label>
-        </div>
-        {results.length === 0 ? (
-          <EmptyState title="Aucune offre avec ces critères.">
-            Élargis la localisation ou retire un filtre. Le catalogue de démonstration contient huit
-            offres.
-          </EmptyState>
-        ) : (
-          <div className="grid items-start gap-5 lg:grid-cols-[1fr_1.1fr]">
-            <ul className="space-y-3">
-              {results.map((j) => (
-                <li
-                  key={j.id}
-                  className={`rounded-xl border bg-card p-4 transition ${active?.id === j.id ? "border-primary ring-1 ring-primary/20" : "hover:border-primary/30"}`}
-                >
-                  <div className="flex items-start gap-3">
-                    <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 font-bold text-primary-text">
-                      {j.company.slice(0, 2).toUpperCase()}
-                    </span>
-                    <button
-                      onClick={() => {
-                        setFocused(j.id);
-                        reviewJob(j.id);
-                        if (window.innerWidth < 1024)
-                          requestAnimationFrame(() => {
-                            const detail = document.getElementById("offer-detail");
-                            detail?.focus({ preventScroll: true });
-                            detail?.scrollIntoView({ behavior: "smooth", block: "start" });
-                          });
-                      }}
-                      className="min-w-0 flex-1 text-left"
-                      aria-pressed={active?.id === j.id}
-                    >
-                      <h3 className="font-bold">{j.title}</h3>
-                      <p className="mt-1 text-xs text-muted-foreground">
-                        {j.company} · {j.city} · Fictif
-                      </p>
-                    </button>
-                    <button
-                      onClick={() => toggleSaved(j.id)}
-                      aria-label={`${saved.includes(j.id) ? "Retirer" : "Sauvegarder"} ${j.title}`}
-                      aria-pressed={saved.includes(j.id)}
-                      className="rounded-lg border p-2 text-primary-text"
-                    >
-                      <Bookmark size={17} fill={saved.includes(j.id) ? "currentColor" : "none"} />
-                    </button>
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                    {[
-                      j.contract,
-                      j.remote,
-                      `${(j.salary / 1000).toLocaleString("fr-FR")} k€ / an`,
-                    ].map((t) => (
-                      <span key={t} className="rounded-md bg-secondary px-2 py-1">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="mt-4 flex justify-between border-t pt-3 text-xs">
-                    <span className="font-bold text-teal-800">{j.score} % · Matching fictif</span>
-                    <span className="text-muted-foreground">Il y a {j.publishedDays} j</span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-            {active && (
-              <article
-                id="offer-detail"
-                tabIndex={-1}
-                className="panel scroll-mt-44 lg:sticky lg:top-40"
+          <Popover.Root>
+            <Popover.Trigger asChild>
+              <button className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
+                <span className="flex items-center gap-3">
+                  <BriefcaseBusiness size={18} />
+                  {t("Contrat", "Contract")}
+                  {criteria.contracts.length > 0 && ` (${criteria.contracts.length})`}
+                </span>
+                <ChevronDown size={15} />
+              </button>
+            </Popover.Trigger>
+            <Popover.Portal>
+              <Popover.Content
+                align="start"
+                sideOffset={15}
+                className="z-40 max-h-80 w-72 overflow-y-auto rounded-2xl border bg-popover p-3 shadow-elegant"
+                aria-label={t("Types de contrat", "Contract types")}
               >
-                <div className="flex justify-between gap-3">
-                  <span className="rounded-full bg-progress/15 px-3 py-1 text-xs font-bold">
-                    Offre fictive
-                  </span>
-                  <span className="text-xs text-muted-foreground">{active.sector}</span>
-                </div>
-                <h2 className="mt-5 text-2xl font-extrabold">{active.title}</h2>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  {active.company} · {active.city}
-                </p>
-                <div className="mt-5 grid grid-cols-2 gap-3 rounded-xl bg-secondary p-4 text-xs">
-                  <p>
-                    <strong className="block">Contrat</strong>
-                    {active.contract}
-                    {active.duration ? ` · ${active.duration} mois` : " · Sans terme"}
-                  </p>
-                  <p>
-                    <strong className="block">Rémunération fictive</strong>
-                    {active.salary.toLocaleString("fr-FR")} € brut / an
-                  </p>
-                  <p>
-                    <strong className="block">Organisation</strong>
-                    {active.remote} · {active.hours}
-                  </p>
-                  <p>
-                    <strong className="block">Début souhaité</strong>
-                    {active.asap
-                      ? "Dès que possible"
-                      : new Date(active.startMonth + "-01T12:00:00Z").toLocaleDateString("fr-FR", {
-                          month: "long",
-                          year: "numeric",
-                          timeZone: "Europe/Paris",
-                        })}
-                  </p>
-                </div>
-                <h3 className="mt-6 font-bold">Une mission pour faire la différence</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Rejoins une équipe pluridisciplinaire autour de projets de{" "}
-                  {active.sector.toLowerCase()}. Tu contribueras à la conception, à l’amélioration
-                  continue et au partage des bonnes pratiques. Description illustrative, sans poste
-                  ouvert réel.
-                </p>
-                <div className="mt-5 rounded-xl border border-primary/20 bg-primary/5 p-4">
-                  <h3 className="text-sm font-bold">Pourquoi ce matching ?</h3>
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                    Score prédéfini de {active.score} %, non calculé sur ton CV. Une estimation
-                    illustrative, jamais une garantie.
-                  </p>
-                  <p className="mt-3 text-xs">
-                    <strong>Points présents dans l’exemple :</strong> {active.skills.join(", ")}.
-                  </p>
-                  <p className="mt-2 text-xs">
-                    <strong>À renforcer :</strong> {active.excludedSkills.join(", ")}.
-                  </p>
-                  <button
-                    onClick={() => reviewJob(active.id)}
-                    className="mt-3 text-xs font-bold text-primary-text"
+                {options("contracts").map((o) => (
+                  <label
+                    key={o.value}
+                    className="flex cursor-pointer gap-3 rounded-lg p-3 text-sm hover:bg-secondary"
                   >
-                    J’ai étudié cette compatibilité
-                  </button>
-                </div>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <button onClick={() => toggleSaved(active.id)} className="btn-primary">
-                    <Bookmark size={16} />
-                    {saved.includes(active.id)
-                      ? "Retirer de ma sélection"
-                      : "Sauvegarder cette offre"}
-                  </button>
-                  <Link
-                    to="/app/cv-studio"
-                    className="flex items-center gap-1 text-sm font-bold text-primary-text"
-                  >
-                    Ajouter mon CV <ArrowUpRight size={16} />
-                  </Link>
-                </div>
-                <p className="mt-5 flex items-start gap-2 border-t pt-4 text-xs leading-relaxed text-muted-foreground">
-                  <ShieldCheck size={16} className="shrink-0" />
-                  Source externe non connectée. Aucune candidature ni création de compte employeur
-                  depuis cette page.
-                </p>
-              </article>
+                    <input
+                      type="checkbox"
+                      checked={criteria.contracts.includes(o.value)}
+                      onChange={() =>
+                        set({
+                          ...criteria,
+                          contracts: criteria.contracts.includes(o.value)
+                            ? criteria.contracts.filter((x) => x !== o.value)
+                            : [...criteria.contracts, o.value],
+                        })
+                      }
+                    />
+                    {t(o.fr, o.en)}
+                  </label>
+                ))}
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
+          <label className="flex items-center gap-3 px-4 py-3">
+            <MapPin size={18} className="shrink-0" />
+            <input
+              aria-label={t("Ville, département ou région", "City, department or region")}
+              value={criteria.city}
+              onChange={(e) => set({ ...criteria, city: e.target.value })}
+              className="w-full min-w-0 bg-transparent text-sm outline-none"
+              placeholder={t("Ville, département, région…", "City, department, region…")}
+            />
+          </label>
+        </div>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-4">
+          <button
+            onClick={() => setModal(true)}
+            className="flex items-center gap-2 rounded-xl border bg-secondary/50 px-4 py-3 text-sm font-semibold"
+          >
+            <SlidersHorizontal size={17} />
+            {t("Tous les filtres", "All filters")}
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs text-primary-text">
+              {chips.length}
+            </span>
+          </button>
+          <p className="flex items-center gap-2 text-xs text-muted-foreground">
+            <Bot size={16} />
+            {t(
+              "Configuration locale · Aucune candidature automatique",
+              "Local configuration · No automated applications",
             )}
+          </p>
+        </div>
+        {chips.length > 0 && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {chips.map((c) => (
+              <button
+                key={c.group + c.value}
+                onClick={() =>
+                  set({ ...criteria, [c.group]: criteria[c.group].filter((v) => v !== c.value) })
+                }
+                className="flex items-center gap-2 rounded-full bg-primary/10 px-3 py-1.5 text-xs text-primary-text"
+                aria-label={`${t("Retirer", "Remove")} ${c.label}`}
+              >
+                {c.label}
+                <X size={12} />
+              </button>
+            ))}
+            <button
+              onClick={() => set(emptyCriteria)}
+              className="text-xs font-bold text-muted-foreground"
+            >
+              {t("Tout effacer", "Clear all")}
+            </button>
           </div>
         )}
       </section>
+      {modal && (
+        <FilterModal
+          open={modal}
+          onClose={() => setModal(false)}
+          value={criteria}
+          onApply={(value) => {
+            set(value);
+            setModal(false);
+          }}
+        />
+      )}
+      <div className="my-6 flex flex-wrap items-center gap-4">
+        <button disabled={!ready} onClick={() => setResult(true)} className="btn-primary">
+          <Search size={17} />
+          {t("Lancer la recherche", "Run search")}
+        </button>
+        {result && (
+          <p role="status" className="text-sm font-semibold text-primary-text">
+            {t("Mode démonstration : configuration prête", "Demo mode: configuration ready")}
+          </p>
+        )}
+      </div>
+      {storageError && (
+        <p role="status" className="mb-4 text-xs text-muted-foreground">
+          {t(
+            "Stockage navigateur indisponible : les critères restent dans cette session.",
+            "Browser storage unavailable: criteria stay in this session.",
+          )}
+        </p>
+      )}
+      <div className="mb-5 flex items-center justify-between">
+        <h2 className="text-sm font-bold">
+          {selected.length} {t("offre(s) de démonstration", "demo listing(s)")}
+        </h2>
+        <span className="text-xs text-muted-foreground">
+          {t("Exemples filtrés localement", "Examples filtered locally")}
+        </span>
+      </div>
+      {selected.length === 0 ? (
+        <EmptyState
+          title={t("Aucun exemple avec ces critères.", "No examples match these criteria.")}
+        >
+          {t(
+            "Élargis la sélection : le catalogue démo contient huit offres.",
+            "Broaden your selection: the demo catalogue contains eight jobs.",
+          )}
+        </EmptyState>
+      ) : (
+        <div className="grid items-start gap-5 xl:grid-cols-[1fr_1fr]">
+          <ul className="space-y-3">
+            {selected.map((j) => (
+              <li
+                key={j.id}
+                className={`panel !rounded-2xl !p-5 ${active?.id === j.id ? "!border-primary/60" : ""}`}
+              >
+                <div className="flex items-start gap-3">
+                  <button
+                    className="min-w-0 flex-1 text-left"
+                    onClick={() => {
+                      setFocused(j.id);
+                      reviewJob(j.id);
+                    }}
+                    aria-pressed={active?.id === j.id}
+                  >
+                    <h3 className="font-bold">{j.title}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {j.company} · {j.city}
+                    </p>
+                  </button>
+                  <button
+                    onClick={() => toggleSaved(j.id)}
+                    aria-label={`${saved.includes(j.id) ? t("Retirer", "Remove") : t("Sauvegarder", "Save")} ${j.title}`}
+                    aria-pressed={saved.includes(j.id)}
+                    className="rounded-lg border p-2 text-primary-text"
+                  >
+                    <Bookmark size={16} fill={saved.includes(j.id) ? "currentColor" : "none"} />
+                  </button>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                  {[
+                    j.contract,
+                    j.remote,
+                    `${j.salary.toLocaleString(language === "fr" ? "fr-FR" : "en-GB")} € / ${t("an", "year")}`,
+                  ].map((s) => (
+                    <span key={s} className="rounded-lg bg-secondary/60 px-2 py-1">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-3 text-xs text-muted-foreground">
+                  {t("Démonstration · Score illustratif", "Demo · Illustrative score")} : {j.score}{" "}
+                  %
+                </p>
+              </li>
+            ))}
+          </ul>
+          {active && (
+            <article className="panel">
+              <span className="text-xs font-bold text-primary-text">
+                {t("APERÇU FICTIF", "FICTIONAL PREVIEW")}
+              </span>
+              <h2 className="mt-3 text-2xl font-extrabold">{active.title}</h2>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {active.company} · {active.city}
+              </p>
+              <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
+                {t(
+                  "Ce poste est un exemple pour tester tes critères. Aucun moteur de recherche externe ni envoi réel n’est connecté. Les scores ne sont pas calculés sur ton CV.",
+                  "This listing is an example for testing your criteria. No external search engine or real submissions are connected. Scores are not based on your CV.",
+                )}
+              </p>
+              <div className="mt-5 rounded-2xl bg-secondary/50 p-4 text-sm">
+                <p className="font-bold">{t("Compétences de l’exemple", "Example skills")}</p>
+                <p className="mt-2 text-muted-foreground">{active.skills.join(" · ")}</p>
+                <p className="mt-4 font-bold">{t("À renforcer", "To develop")}</p>
+                <p className="mt-2 text-muted-foreground">{active.excludedSkills.join(" · ")}</p>
+              </div>
+              <button
+                onClick={() => reviewJob(active.id)}
+                className="mt-5 text-sm font-semibold text-primary-text"
+              >
+                {t("J’ai étudié ce matching", "I reviewed this match")}
+              </button>
+              <Link
+                to="/app/cv-studio"
+                className="mt-6 flex items-center gap-2 border-t pt-4 text-sm font-bold text-primary-text"
+              >
+                {t("Préparer mes CV", "Prepare my CVs")}
+                <ArrowUpRight size={16} />
+              </Link>
+            </article>
+          )}
+        </div>
+      )}
     </>
   );
 }

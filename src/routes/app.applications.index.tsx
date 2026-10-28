@@ -1,133 +1,234 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { ArrowUpRight, Mail, Search, FileText, MessageSquare, CalendarDays } from "lucide-react";
+import { ArrowUpRight, Mail } from "lucide-react";
 import { useWorkspace } from "@/components/workspace/useWorkspace";
+import { usePreferences } from "@/components/preferences/usePreferences";
 import { PageTitle, PeriodFilter, StageBadge, EmptyState } from "@/components/workspace/Shared";
-import { statistics, formatDate, stages, type Period } from "@/lib/workspace-data";
-export const Route = createFileRoute("/app/applications/")({
-  head: () => ({ meta: [{ title: "Suivi des candidatures — Crétoria" }] }),
-  component: Applications,
-});
+import { statistics, formatDate, jobs, type Period } from "@/lib/workspace-data";
+export const Route = createFileRoute("/app/applications/")({ component: Applications });
 function Applications() {
+  const { t } = usePreferences();
   const { applications } = useWorkspace();
   const [period, setPeriod] = useState<Period>("30d");
-  const [stage, setStage] = useState("");
+  const [stage, setStage] = useState("all");
+  const [company, setCompany] = useState("");
   const [q, setQ] = useState("");
+  const [contract, setContract] = useState("");
+  const [city, setCity] = useState("");
   const [emailOnly, setEmailOnly] = useState(false);
   const stats = useMemo(() => statistics(applications, period), [applications, period]);
   const list = stats.selected
-    .filter(
-      (a) =>
-        (!stage || a.stage === stage) &&
-        (!emailOnly || a.email) &&
-        `${a.title} ${a.company}`.toLowerCase().includes(q.toLowerCase()),
-    )
+    .filter((a) => {
+      const job = jobs.find((j) => j.id === a.jobId);
+      return (
+        (stage === "all" ||
+          stage === "submitted" ||
+          ((stage === "pending" || stage === "no-response") && !a.responseAt) ||
+          (stage === "ongoing" && ["Réponse reçue", "Entretien"].includes(a.stage)) ||
+          (stage === "interview" && a.stage === "Entretien") ||
+          (stage === "rejected" && a.stage === "Refusée") ||
+          (stage === "offer" && a.stage === "Offre reçue")) &&
+        (!company || a.company === company) &&
+        (!q || a.title.toLowerCase().includes(q.toLowerCase())) &&
+        (!contract || job?.contract === contract) &&
+        (!city || job?.city === city) &&
+        (!emailOnly || a.email)
+      );
+    })
     .sort((a, b) => b.sentAt.localeCompare(a.sentAt));
+  const choices = [
+    { value: "all", fr: "Toutes", en: "All" },
+    { value: "submitted", fr: "Envoyées", en: "Submitted" },
+    { value: "pending", fr: "En attente", en: "Awaiting reply" },
+    { value: "no-response", fr: "Sans réponse", en: "No response" },
+    {
+      value: "processing",
+      fr: "En traitement (non disponible)",
+      en: "Processing (unavailable)",
+      disabled: true,
+    },
+    { value: "ongoing", fr: "Processus en cours", en: "Process in progress" },
+    { value: "interview", fr: "Entretien", en: "Interview" },
+    {
+      value: "accepted",
+      fr: "Acceptées (non disponible)",
+      en: "Accepted (unavailable)",
+      disabled: true,
+    },
+    { value: "offer", fr: "Offre reçue", en: "Offer received" },
+    { value: "rejected", fr: "Refusées", en: "Rejected" },
+  ];
   return (
     <>
       <PageTitle
-        eyebrow="CHAQUE DOSSIER GARDE SON HISTOIRE"
-        title="Tout ton suivi. Rien de perdu."
-        description="Retrouve chaque candidature, son étape, les réponses signalées et les documents associés. Les données ci-dessous sont fictives ; aucune boîte mail n’est connectée."
+        eyebrow={t("CHAQUE DOSSIER GARDE SON HISTOIRE", "EVERY APPLICATION HAS A STORY")}
+        title={t("Ton suivi, en toute clarté.", "Your applications, clearly organised.")}
+        description={t(
+          "Conserve une vue d’ensemble des réponses, des documents et des prochaines étapes. Données fictives, sans connexion email.",
+          "Keep track of responses, documents and next steps. Fictional data, with no email connection.",
+        )}
       >
         <PeriodFilter value={period} onChange={setPeriod} />
       </PageTitle>
-      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+      <div className="mb-5 grid gap-4 sm:grid-cols-3">
         {[
-          { title: "Candidatures sur la période", value: stats.total, icon: FileText },
           {
-            title: "Réponses reçues",
-            value: `${stats.replies} · ${stats.replyRate} %`,
-            icon: MessageSquare,
+            fr: "Candidatures sur la période",
+            en: "Applications in this period",
+            value: stats.total,
           },
-          { title: "Emails signalés", value: stats.emails, icon: Mail },
-        ].map((x) => (
-          <div key={x.title} className="panel flex items-center gap-4">
-            <span className="rounded-xl bg-primary/10 p-3 text-primary-text">
-              <x.icon size={22} />
-            </span>
-            <div>
-              <p className="text-xs text-muted-foreground">{x.title}</p>
-              <p className="mt-1 text-2xl font-extrabold">{x.value}</p>
-            </div>
+          {
+            fr: "Réponses reçues",
+            en: "Replies received",
+            value: `${stats.replies} · ${stats.replyRate} %`,
+          },
+          { fr: "Emails signalés", en: "Reported emails", value: stats.emails },
+        ].map((c) => (
+          <div key={c.fr} className="panel">
+            <h2 className="text-xs text-muted-foreground">{t(c.fr, c.en)}</h2>
+            <p className="mt-3 text-3xl font-medium">{c.value}</p>
           </div>
         ))}
       </div>
       <section className="panel">
-        <div className="mb-5 grid items-end gap-4 sm:grid-cols-[1fr_1fr_auto]">
-          <label className="text-xs font-bold">
-            <span className="flex gap-2">
-              <Search size={14} /> Retrouver un dossier
-            </span>
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          <label className="text-xs font-semibold">
+            {t("Poste recherché", "Job title")}
             <input
               className="field"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Métier, entreprise…"
+              placeholder={t("Rechercher un poste…", "Search job titles…")}
             />
           </label>
-          <label className="text-xs font-bold">
-            Étape du processus
-            <select className="field" value={stage} onChange={(e) => setStage(e.target.value)}>
-              <option value="">Toutes les étapes</option>
-              {stages.map((s) => (
-                <option key={s}>{s}</option>
+          <label className="text-xs font-semibold">
+            {t("Statut", "Status")}
+            <select
+              className="field"
+              aria-label={t("Statut", "Status")}
+              value={stage}
+              onChange={(e) => setStage(e.target.value)}
+            >
+              {choices.map((o) => (
+                <option key={o.value} value={o.value} disabled={o.disabled}>
+                  {t(o.fr, o.en)}
+                </option>
               ))}
             </select>
           </label>
-          <label className="flex items-center gap-2 py-3 text-xs font-semibold">
+          <label className="text-xs font-semibold">
+            {t("Entreprise", "Company")}
+            <select
+              className="field"
+              aria-label={t("Entreprise", "Company")}
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+            >
+              <option value="">{t("Toutes les entreprises", "All companies")}</option>
+              {[...new Set(applications.map((a) => a.company))].map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-semibold">
+            {t("Contrat", "Contract")}
+            <select
+              className="field"
+              aria-label={t("Contrat", "Contract")}
+              value={contract}
+              onChange={(e) => setContract(e.target.value)}
+            >
+              <option value="">{t("Tous les contrats", "All contracts")}</option>
+              {[...new Set(jobs.map((j) => j.contract))].map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-semibold">
+            {t("Localisation", "Location")}
+            <select
+              className="field"
+              aria-label={t("Localisation", "Location")}
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+            >
+              <option value="">{t("Toutes les villes", "All cities")}</option>
+              {[...new Set(jobs.map((j) => j.city))].map((c) => (
+                <option key={c}>{c}</option>
+              ))}
+            </select>
+          </label>
+          <label className="text-xs font-semibold">
+            {t("Type de candidature", "Application type")}
+            <select disabled className="field opacity-60">
+              <option>
+                {t("Non renseigné dans les données", "Not available in existing data")}
+              </option>
+            </select>
+          </label>
+        </div>
+        <div className="my-5 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <label className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={emailOnly}
               onChange={(e) => setEmailOnly(e.target.checked)}
-            />{" "}
-            Avec email reçu
+            />
+            {t("Avec email reçu", "With reported email")}
           </label>
+          <button
+            onClick={() => {
+              setQ("");
+              setStage("all");
+              setCompany("");
+              setContract("");
+              setCity("");
+              setEmailOnly(false);
+            }}
+            className="font-semibold text-primary-text"
+          >
+            {t("Réinitialiser", "Reset filters")}
+          </button>
         </div>
-        <p className="mb-4 text-xs text-muted-foreground" aria-live="polite">
-          {list.length} dossier{list.length > 1 ? "s" : ""} affiché{list.length > 1 ? "s" : ""} ·
-          Période calculée depuis le 27 octobre 2026
+        <p aria-live="polite" className="mb-4 border-t pt-4 text-xs text-muted-foreground">
+          {list.length}{" "}
+          {t("dossier(s) · Référence : 27 octobre 2026", "record(s) · Reference: 27 October 2026")}
         </p>
-        {list.length === 0 ? (
-          <EmptyState title="Aucun dossier pour cette sélection.">
-            Modifie la période, le statut ou tes mots-clés.
+        {!list.length ? (
+          <EmptyState
+            title={t("Aucun dossier pour cette sélection.", "No records match this selection.")}
+          >
+            {t(
+              "Élargis la période ou modifie les filtres.",
+              "Broaden the period or adjust your filters.",
+            )}
           </EmptyState>
         ) : (
-          <ul className="space-y-3">
+          <ul className="divide-y">
             {list.map((a) => (
               <li key={a.id}>
                 <Link
                   to="/app/applications/$id"
                   params={{ id: a.id }}
-                  className="flex flex-wrap items-center gap-4 rounded-xl border p-4 transition hover:border-primary/40 hover:bg-background"
+                  className="flex flex-wrap items-center gap-3 py-5"
                 >
-                  <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-secondary text-sm font-bold text-primary-text">
+                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-xs text-primary-text">
                     {a.company.slice(0, 2).toUpperCase()}
                   </span>
-                  <div className="min-w-[160px] flex-1">
-                    <h2 className="text-sm font-bold">{a.title}</h2>
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-sm font-semibold">{a.title}</h2>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {a.company} · {a.sector} · Fictif
+                      {a.company} · {formatDate(a.sentAt)}
                     </p>
                   </div>
-                  <div className="flex flex-wrap items-center gap-4 text-xs">
-                    <span className="flex items-center gap-1.5 text-muted-foreground">
-                      <CalendarDays size={14} />
-                      {formatDate(a.sentAt)}
-                    </span>
+                  <div className="flex flex-wrap items-center gap-4">
                     <StageBadge stage={a.stage} />
-                    <span
-                      className={`flex items-center gap-1 ${a.email ? "text-teal-800" : "text-muted-foreground"}`}
-                    >
-                      <Mail size={15} />
-                      {a.email ? "Email reçu" : "Pas d’email"}
+                    <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Mail size={14} />
+                      {a.email ? t("Email reçu", "Email reported") : t("Sans email", "No email")}
                     </span>
-                    <ArrowUpRight size={18} className="text-primary-text" />
+                    <ArrowUpRight size={16} className="text-primary-text" />
                   </div>
-                  <p className="w-full border-t pt-3 text-xs text-muted-foreground">
-                    CV et lettre d’exemple joints · Ouvrir le dossier pour consulter les documents
-                    et renseigner le lien de l’offre
-                  </p>
                 </Link>
               </li>
             ))}

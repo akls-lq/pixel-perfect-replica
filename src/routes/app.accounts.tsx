@@ -1,3 +1,4 @@
+import { usePreferences } from "@/components/preferences/usePreferences";
 import { useWorkspace } from "@/components/workspace/useWorkspace";
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
@@ -9,6 +10,7 @@ export const Route = createFileRoute("/app/accounts")({
   component: Accounts,
 });
 function Accounts() {
+  const { t } = usePreferences();
   const { accounts, setAccounts } = useWorkspace();
   const [visible, setVisible] = useState<string[]>([]);
   const [form, setForm] = useState(false);
@@ -19,11 +21,14 @@ function Accounts() {
   async function copy(value: string) {
     try {
       await navigator.clipboard.writeText(value);
-      setMessage("Identifiant de démonstration copié.");
+      setMessage(t("Identifiant de démonstration copié.", "Demo credential copied."));
       setError("");
     } catch {
       setError(
-        "La copie est indisponible dans ce navigateur. Révèle le champ pour le copier manuellement.",
+        t(
+          "La copie est indisponible dans ce navigateur. Révèle le champ pour le copier manuellement.",
+          "Copying is unavailable in this browser. Reveal the field to copy it manually.",
+        ),
       );
     }
   }
@@ -39,22 +44,26 @@ function Accounts() {
   return (
     <>
       <PageTitle
-        eyebrow="TON RÉPERTOIRE EMPLOYEURS"
-        title="Tes accès, au même endroit."
-        description="Une vue front-end des comptes associés aux sites employeurs. Aucun compte réel n’a été créé par Crétoria."
+        eyebrow={t("TON RÉPERTOIRE EMPLOYEURS", "YOUR EMPLOYER DIRECTORY")}
+        title={t("Tes accès, au même endroit.", "Your credentials, in one place.")}
+        description={t(
+          "Une vue front-end des comptes associés aux sites employeurs. Aucun compte réel n’a été créé par Crétoria.",
+          "A front-end view of employer website accounts. Crétoria has not created any real accounts.",
+        )}
       >
         <button onClick={() => setForm((f) => !f)} aria-expanded={form} className="btn-primary">
-          <Plus size={16} /> Ajouter un compte démo
+          <Plus size={16} />
+          {t("Ajouter un compte démo", "Add a demo account")}
         </button>
       </PageTitle>
       <div className="mb-6 flex items-start gap-3 rounded-xl border border-primary/20 bg-primary/5 p-4 text-xs leading-relaxed">
         <ShieldCheck className="shrink-0 text-primary-text" size={20} />
         <p>
-          <strong>Identifiants fictifs uniquement.</strong> Les mots de passe ci-dessous sont des
-          exemples. N’entre pas de vrai mot de passe dans ce prototype : il n’existe pas encore de
-          coffre chiffré ni de compte utilisateur. Rien n’est stocké sur un serveur ou dans le
-          stockage du navigateur ; un rechargement efface les ajouts. Les sites example.com ne sont
-          pas des portails employeurs réels.
+          <strong>{t("Identifiants fictifs uniquement.", "Fictional credentials only.")}</strong>
+          {t(
+            "Les mots de passe ci-dessous sont des exemples. N’entre pas de vrai mot de passe dans ce prototype : il n’existe pas encore de coffre chiffré ni de compte utilisateur. Rien n’est stocké sur un serveur ou dans le stockage du navigateur ; un rechargement efface les ajouts. Les sites example.com ne sont pas des portails employeurs réels.",
+            "The passwords below are examples. Do not enter real passwords in this prototype: there is no encrypted vault or user authentication yet. Nothing is saved on a server or in browser storage; reloading clears additions. The example.com sites are not real employer portals.",
+          )}
         </p>
       </div>
       {message && (
@@ -81,20 +90,30 @@ function Accounts() {
               draft.password.length < 12
             ) {
               setError(
-                "Vérifie le nom, l’URL complète, l’email et le mot de passe fictif (12 caractères minimum).",
+                t(
+                  "Vérifie le nom, l’URL complète, l’email et le mot de passe fictif (12 caractères minimum).",
+                  "Check the name, full URL, email and fictional password (at least 12 characters).",
+                ),
               );
               return;
             }
             setAccounts((xs) => [...xs, { ...draft, id: crypto.randomUUID() }]);
             setDraft({ company: "", url: "", email: "", password: "" });
             setForm(false);
-            setMessage("Compte fictif ajouté à cette session. Aucun compte externe créé.");
+            setMessage(
+              t(
+                "Compte fictif ajouté à cette session. Aucun compte externe créé.",
+                "Demo account added to this session. No external account was created.",
+              ),
+            );
           }}
         >
-          <h2 className="font-bold">Ajouter un exemple de compte</h2>
+          <h2 className="font-bold">
+            {t("Ajouter un exemple de compte", "Add an example account")}
+          </h2>
           <div className="mt-4 grid gap-4 sm:grid-cols-2">
             <label className="text-xs font-bold">
-              Nom de l’employeur
+              {t("Nom de l’employeur", "Employer name")}
               <input
                 required
                 maxLength={100}
@@ -104,7 +123,7 @@ function Accounts() {
               />
             </label>
             <label className="text-xs font-bold">
-              Site employeur
+              {t("Site employeur", "Employer website")}
               <input
                 required
                 type="url"
@@ -115,7 +134,7 @@ function Accounts() {
               />
             </label>
             <label className="text-xs font-bold">
-              Email fictif
+              {t("Email fictif", "Fictional email")}
               <input
                 required
                 type="email"
@@ -127,7 +146,7 @@ function Accounts() {
               />
             </label>
             <label className="text-xs font-bold">
-              Mot de passe fictif
+              {t("Mot de passe fictif", "Fictional password")}
               <input
                 required
                 type="password"
@@ -138,36 +157,38 @@ function Accounts() {
                 onChange={(e) => setDraft((d) => ({ ...d, password: e.target.value }))}
               />
               <button type="button" onClick={generate} className="mt-2 text-xs text-primary-text">
-                Générer un exemple robuste
+                {t("Générer un exemple robuste", "Generate a strong example")}
               </button>
             </label>
           </div>
           <div className="mt-5 flex gap-3">
             <button type="submit" className="btn-primary">
-              Ajouter à la démo
+              {t("Ajouter à la démo", "Add to demo")}
             </button>
             <button
               type="button"
               onClick={() => setForm(false)}
               className="rounded-lg border px-4 text-sm"
             >
-              Annuler
+              {t("Annuler", "Cancel")}
             </button>
           </div>
         </form>
       )}
       <label className="mb-5 block max-w-md text-xs font-bold">
-        Rechercher un employeur ou un email
+        {t("Rechercher un employeur ou un email", "Search an employer or email")}
         <input
           className="field"
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Nom d’entreprise…"
+          placeholder={t("Nom d’entreprise…", "Company name…")}
         />
       </label>
       {list.length === 0 ? (
-        <EmptyState title="Aucun compte dans cette sélection.">
-          Change la recherche ou ajoute un exemple.
+        <EmptyState
+          title={t("Aucun compte dans cette sélection.", "No accounts match this selection.")}
+        >
+          {t("Change la recherche ou ajoute un exemple.", "Change your search or add an example.")}
         </EmptyState>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -179,14 +200,16 @@ function Accounts() {
                 </span>
                 <div className="min-w-0 flex-1">
                   <h2 className="font-bold">{a.company}</h2>
-                  <p className="mt-1 text-xs text-muted-foreground">Compte fictif · Non connecté</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t("Compte fictif · Non connecté", "Fictional account · Not connected")}
+                  </p>
                 </div>
                 <button
                   onClick={() => {
                     setAccounts((xs) => xs.filter((x) => x.id !== a.id));
                     setVisible((xs) => xs.filter((x) => x !== a.id));
                   }}
-                  aria-label={`Supprimer le compte ${a.company}`}
+                  aria-label={`${t("Supprimer le compte", "Delete account")} ${a.company}`}
                   className="rounded-lg border p-2 text-muted-foreground"
                 >
                   <Trash2 size={15} />
@@ -203,12 +226,14 @@ function Accounts() {
               </a>
               <dl className="mt-5 space-y-4">
                 <div>
-                  <dt className="text-xs font-semibold text-muted-foreground">Email choisi</dt>
+                  <dt className="text-xs font-semibold text-muted-foreground">
+                    {t("Email choisi", "Chosen email")}
+                  </dt>
                   <dd className="mt-1 flex items-center justify-between gap-2 rounded-lg bg-background px-3 py-2">
                     <span className="min-w-0 break-all text-sm">{a.email}</span>
                     <button
                       onClick={() => void copy(a.email)}
-                      aria-label={`Copier l’email ${a.company}`}
+                      aria-label={`${t("Copier l’email", "Copy email for")} ${a.company}`}
                       className="shrink-0 p-1 text-primary-text"
                     >
                       <Copy size={15} />
@@ -217,7 +242,7 @@ function Accounts() {
                 </div>
                 <div>
                   <dt className="text-xs font-semibold text-muted-foreground">
-                    Mot de passe fictif
+                    {t("Mot de passe fictif", "Fictional password")}
                   </dt>
                   <dd className="mt-1 flex items-center gap-2 rounded-lg bg-background px-3 py-2">
                     <span className="min-w-0 flex-1 break-all font-mono text-sm">
@@ -229,7 +254,7 @@ function Accounts() {
                           xs.includes(a.id) ? xs.filter((x) => x !== a.id) : [...xs, a.id],
                         )
                       }
-                      aria-label={`${visible.includes(a.id) ? "Masquer" : "Afficher"} le mot de passe ${a.company}`}
+                      aria-label={`${visible.includes(a.id) ? t("Masquer", "Hide") : t("Afficher", "Show")} ${t("le mot de passe", "password for")} ${a.company}`}
                       aria-pressed={visible.includes(a.id)}
                       className="shrink-0 p-1 text-primary-text"
                     >
@@ -237,7 +262,7 @@ function Accounts() {
                     </button>
                     <button
                       onClick={() => void copy(a.password)}
-                      aria-label={`Copier le mot de passe ${a.company}`}
+                      aria-label={`${t("Copier le mot de passe", "Copy password for")} ${a.company}`}
                       className="shrink-0 p-1 text-primary-text"
                     >
                       <Copy size={15} />

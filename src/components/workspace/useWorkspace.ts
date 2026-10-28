@@ -13,6 +13,8 @@ export type State = {
   toggleSaved: (id: string) => void;
   reviewed: string[];
   reviewJob: (id: string) => void;
+  resumes: Resume[];
+  setResumes: React.Dispatch<React.SetStateAction<Resume[]>>;
   resume: Resume | null;
   setResume: (resume: Resume | null) => void;
 };

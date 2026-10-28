@@ -20,7 +20,7 @@
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
-  --color-primary-text: #404cd6;
+  --color-primary-text: var(--primary-text);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -44,46 +44,146 @@
 }
 
 :root {
-  --radius: 0.625rem;
-  --background: #f7f9fc;
-  --foreground: #17213a;
-  --card: #ffffff;
-  --card-foreground: #101936;
-  --popover: #ffffff;
-  --popover-foreground: #101936;
-  /* Indigo = brand / primary interactions */
-  --primary: #4f5cf1;
-  --primary-foreground: #ffffff;
-  --secondary: #eef1f8;
-  --secondary-foreground: #101936;
-  --muted: #eef1f8;
-  --muted-foreground: #5d6c82;
-  --accent: #4f5cf1;
-  --accent-foreground: #ffffff;
-  /* Turquoise = positive actions / matching */
+  --radius: 1rem;
+  --background: #f2ecff;
+  --foreground: #251b38;
+  --card: #fcfaff;
+  --card-foreground: #251b38;
+  --popover: #fcfaff;
+  --popover-foreground: #251b38;
+  --primary: #8139ed;
+  --primary-text: #7130cf;
+  --primary-foreground: #fff;
+  --secondary: #eee5fa;
+  --secondary-foreground: #322346;
+  --muted: #eee5fa;
+  --muted-foreground: #695a79;
+  --accent: #8139ed;
+  --accent-foreground: #fff;
   --action: #0db89a;
-  --action-foreground: #101936;
-  /* Orange = progression / XP */
-  --progress: #f59e42;
-  --progress-foreground: #101936;
-  /* Night blue = navigation, dark surfaces */
-  --ink: #101936;
-  --ink-foreground: #f7f9fc;
-  --ink-muted: #a3abc6;
-  --destructive: #e5484d;
-  --destructive-foreground: #ffffff;
-  --border: #e3e7f0;
-  --input: #d7dce8;
-  --ring: #4f5cf1;
-  --gradient-ink:
-    radial-gradient(
-      ellipse at 15% 0%,
-      color-mix(in oklab, var(--primary) 45%, transparent),
-      transparent 55%
-    ),
-    var(--ink);
-  --shadow-soft: 0 1px 2px rgb(16 25 54 / 0.04), 0 4px 12px rgb(16 25 54 / 0.05);
-  --shadow-elegant: 0 1px 2px rgb(16 25 54 / 0.05), 0 20px 40px -16px rgb(16 25 54 / 0.18);
+  --action-foreground: #10251f;
+  --progress: #ed9d3d;
+  --progress-foreground: #251b38;
+  --ink: #211032;
+  --ink-foreground: #fff;
+  --ink-muted: #cab8dc;
+  --destructive: #ce334b;
+  --destructive-foreground: #fff;
+  --border: #e2d5f1;
+  --input: #d8c9e9;
+  --ring: #8139ed;
+  --gradient-ink: linear-gradient(130deg, #432269, #251135);
+  --shadow-soft: 0 2px 3px #43226906, 0 8px 28px -18px #43226935;
+  --shadow-elegant: 0 12px 40px -20px #43226945;
+  color-scheme: light;
+}
+:root.dark {
+  --background: #140a25;
+  --foreground: #f3edfc;
+  --card: #201331;
+  --card-foreground: #f3edfc;
+  --popover: #251638;
+  --popover-foreground: #f3edfc;
+  --primary: #9a59f8;
+  --primary-text: #c99aff;
+  --primary-foreground: #14091f;
+  --secondary: #30203f;
+  --secondary-foreground: #f3edfc;
+  --muted: #30203f;
+  --muted-foreground: #b8a7c9;
+  --accent: #9a59f8;
+  --accent-foreground: #14091f;
+  --border: #423052;
+  --input: #564067;
+  --ring: #b885ff;
+  --ink: #180b2b;
+  --ink-muted: #bfa8d6;
+  --shadow-soft: 0 5px 25px -15px #0008;
+  --shadow-elegant: 0 12px 40px -20px #000b;
+  color-scheme: dark;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) {
+  z-index: 9999;
+}
+.workspace-bg {
+  background:
+    radial-gradient(ellipse at 15% 5%, #c7aff45c, transparent 55%),
+    radial-gradient(ellipse at 95% 0%, #f0c7e54a, transparent 55%), var(--background);
+}
+.dark .workspace-bg {
+  background: radial-gradient(ellipse at 10% 0%, #5b2b7435, transparent 60%), var(--background);
+}
+.creto-runner {
+  position: relative;
+  width: 110px;
+}
+.runner-body {
+  animation: run-bounce 0.35s infinite alternate;
+  transform-origin: center;
+}
+.runner-leg {
+  animation: run-stride 0.45s infinite alternate;
+  transform-origin: 60px 72px;
+}
+.runner-leg.rear {
+  animation-delay: -0.45s;
+}
+.runner-dust {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: var(--primary);
+  border-radius: 50%;
+  bottom: 14px;
+  left: 22px;
+  animation: run-dust 0.65s infinite;
+}
+@keyframes run-bounce {
+  to {
+    transform: translateY(-4px) rotate(4deg);
+  }
+}
+@keyframes run-stride {
+  from {
+    transform: rotate(-25deg);
+  }
+  to {
+    transform: rotate(25deg);
+  }
+}
+@keyframes run-dust {
+  to {
+    transform: translate(-30px, -7px) scale(2);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root) {
+    animation: none !important;
+  }
+  .runner-body,
+  .runner-leg,
+  .runner-dust {
+    animation: none !important;
+  }
+}
+/* Legacy status surfaces keep their meaning in both themes. */
+.dark :is(.bg-teal-50, .bg-sky-50, .bg-orange-50, .bg-violet-50, .bg-red-50) {
+  background: #352344;
+}
+.dark :is(.text-teal-800, .text-teal-700) {
+  color: #6fe0c7;
+}
+.dark :is(.text-red-800) {
+  color: #ff9cac;
+}
+.dark :is(.text-sky-800, .text-violet-800, .text-orange-800) {
+  color: #dfc2ff;
 }
 
 @layer base {
@@ -134,7 +234,7 @@
     @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-3 text-sm font-bold text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50;
   }
   .panel {
-    @apply min-w-0 rounded-2xl border bg-card p-5 shadow-soft md:p-6;
+    @apply min-w-0 rounded-[1.75rem] border bg-card p-5 shadow-soft md:p-6;
   }
   .field {
     @apply mt-2 w-full rounded-lg border bg-background px-3 py-3 text-base;
