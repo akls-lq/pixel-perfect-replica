@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import * as Popover from "@radix-ui/react-popover";
 import {
@@ -8,33 +8,27 @@ import {
   SlidersHorizontal,
   ChevronDown,
   X,
-  Bookmark,
-  ArrowUpRight,
   Bot,
 } from "lucide-react";
 import { usePreferences } from "@/components/preferences/usePreferences";
-import { useWorkspace } from "@/components/workspace/useWorkspace";
 import { FilterModal } from "@/components/workspace/FilterModal";
 import {
   emptyCriteria,
   restoreCriteria,
   options,
   futureMonths,
-  selectDemoJobs,
   type Group,
   type SearchCriteria,
 } from "@/lib/autopilot-data";
 import { PageTitle, EmptyState } from "@/components/workspace/Shared";
 export const Route = createFileRoute("/app/offers")({ component: Autopilot });
 function Autopilot() {
-  const { t, language } = usePreferences();
-  const { saved, toggleSaved, reviewJob } = useWorkspace();
+  const { t } = usePreferences();
   const [criteria, setCriteria] = useState<SearchCriteria>(emptyCriteria);
   const [ready, setReady] = useState(false);
   const [storageError, setStorageError] = useState(false);
   const [modal, setModal] = useState(false);
   const [result, setResult] = useState(false);
-  const [focused, setFocused] = useState<string | null>(null);
   useEffect(() => {
     try {
       setCriteria(restoreCriteria(JSON.parse(localStorage.getItem("cretoria.criteria") || "{}")));
@@ -56,8 +50,6 @@ function Autopilot() {
     setCriteria(next);
     setResult(false);
   };
-  const selected = selectDemoJobs(criteria);
-  const active = selected.find((j) => j.id === focused) ?? selected[0];
   const months = futureMonths(new Date());
   const chips = (
     Object.keys(emptyCriteria).filter((k) => k !== "q" && k !== "city") as Group[]
@@ -87,8 +79,8 @@ function Autopilot() {
         eyebrow={t("UNE RECHERCHE À TON IMAGE", "SEARCH, YOUR WAY")}
         title={t("Configurons ta prochaine opportunité.", "Let’s find your next opportunity.")}
         description={t(
-          "Les bons critères, une sélection à relire. L’Autopilote reste entièrement sous ton contrôle.",
-          "The right criteria, a shortlist to review. You stay in control of Autopilot.",
+          "Définis tes critères de recherche. L’Autopilote reste entièrement sous ton contrôle.",
+          "Define your search criteria. You stay in control of Autopilot.",
         )}
       />
       <section className="panel !p-4 md:!p-6">
@@ -228,110 +220,12 @@ function Autopilot() {
           )}
         </p>
       )}
-      <div className="mb-5 flex items-center justify-between">
-        <h2 className="text-sm font-bold">
-          {selected.length} {t("offre(s) de démonstration", "demo listing(s)")}
-        </h2>
-        <span className="text-xs text-muted-foreground">
-          {t("Exemples filtrés localement", "Examples filtered locally")}
-        </span>
-      </div>
-      {selected.length === 0 ? (
-        <EmptyState
-          title={t("Aucun exemple avec ces critères.", "No examples match these criteria.")}
-        >
-          {t(
-            "Élargis la sélection : le catalogue démo contient huit offres.",
-            "Broaden your selection: the demo catalogue contains eight jobs.",
-          )}
-        </EmptyState>
-      ) : (
-        <div className="grid items-start gap-5 xl:grid-cols-[1fr_1fr]">
-          <ul className="space-y-3">
-            {selected.map((j) => (
-              <li
-                key={j.id}
-                className={`panel !rounded-2xl !p-5 ${active?.id === j.id ? "!border-primary/60" : ""}`}
-              >
-                <div className="flex items-start gap-3">
-                  <button
-                    className="min-w-0 flex-1 text-left"
-                    onClick={() => {
-                      setFocused(j.id);
-                      reviewJob(j.id);
-                    }}
-                    aria-pressed={active?.id === j.id}
-                  >
-                    <h3 className="font-bold">{j.title}</h3>
-                    <p className="mt-1 text-xs text-muted-foreground">
-                      {j.company} · {j.city}
-                    </p>
-                  </button>
-                  <button
-                    onClick={() => toggleSaved(j.id)}
-                    aria-label={`${saved.includes(j.id) ? t("Retirer", "Remove") : t("Sauvegarder", "Save")} ${j.title}`}
-                    aria-pressed={saved.includes(j.id)}
-                    className="rounded-lg border p-2 text-primary-text"
-                  >
-                    <Bookmark size={16} fill={saved.includes(j.id) ? "currentColor" : "none"} />
-                  </button>
-                </div>
-                <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                  {[
-                    j.contract,
-                    j.remote,
-                    `${j.salary.toLocaleString(language === "fr" ? "fr-FR" : "en-GB")} € / ${t("an", "year")}`,
-                  ].map((s) => (
-                    <span key={s} className="rounded-lg bg-secondary/60 px-2 py-1">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-                <p className="mt-3 text-xs text-muted-foreground">
-                  {t("Démonstration · Score illustratif", "Demo · Illustrative score")} : {j.score}{" "}
-                  %
-                </p>
-              </li>
-            ))}
-          </ul>
-          {active && (
-            <article className="panel">
-              <span className="text-xs font-bold text-primary-text">
-                {t("APERÇU FICTIF", "FICTIONAL PREVIEW")}
-              </span>
-              <h2 className="mt-3 text-2xl font-extrabold">{active.title}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {active.company} · {active.city}
-              </p>
-              <p className="mt-6 text-sm leading-relaxed text-muted-foreground">
-                {t(
-                  "Ce poste est un exemple pour tester tes critères. Aucun moteur de recherche externe ni envoi réel n’est connecté. Les scores ne sont pas calculés sur ton CV.",
-                  "This listing is an example for testing your criteria. No external search engine or real submissions are connected. Scores are not based on your CV.",
-                )}
-              </p>
-              <div className="mt-5 rounded-2xl bg-secondary/50 p-4 text-sm">
-                <p className="font-bold">{t("Compétences de l’exemple", "Example skills")}</p>
-                <p className="mt-2 text-muted-foreground">{active.skills.join(" · ")}</p>
-                <p className="mt-4 font-bold">{t("À renforcer", "To develop")}</p>
-                <p className="mt-2 text-muted-foreground">{active.excludedSkills.join(" · ")}</p>
-              </div>
-              <button
-                onClick={() => reviewJob(active.id)}
-                className="mt-5 text-sm font-semibold text-primary-text"
-              >
-                {t("J’ai étudié ce matching", "I reviewed this match")}
-              </button>
-              <Link
-                to="/app/cv-studio"
-                className="mt-6 flex items-center gap-2 border-t pt-4 text-sm font-bold text-primary-text"
-              >
-                {t("Préparer mes CV", "Prepare my CVs")}
-                <ArrowUpRight size={16} />
-              </Link>
-            </article>
-          )}
-        </div>
-      )}
+      <EmptyState title={t("Aucune source d’offres connectée.", "No job source connected.")}>
+        {t(
+          "Configure tes critères ci-dessus. Les offres apparaîtront lorsque la recherche sera connectée à des sources réelles. Aucune candidature n’est envoyée depuis cette page.",
+          "Set your criteria above. Listings will appear once search is connected to real sources. No applications are sent from this page.",
+        )}
+      </EmptyState>
     </>
   );
 }

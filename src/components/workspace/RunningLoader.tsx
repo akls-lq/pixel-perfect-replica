@@ -16,7 +16,7 @@ export function RunningLoader() {
             <path
               d="m55 72-15 22 19 1"
               fill="none"
-              stroke="#ae8aff"
+              stroke="#101936"
               strokeWidth="8"
               strokeLinecap="round"
             />
@@ -31,14 +31,14 @@ export function RunningLoader() {
             />
           </g>
           <g className="runner-body">
-            <path d="M83 26a30 30 0 1 0 0 42L68 56a12 12 0 1 1 0-17Z" fill="#9148ff" />
+            <path d="M83 26a30 30 0 1 0 0 42L68 56a12 12 0 1 1 0-17Z" fill="#4f5cf1" />
             <path d="m60 17 13-14 4 22Z" fill="#0db89a" />
             <ellipse cx="77" cy="39" rx="12" ry="15" fill="white" />
-            <circle cx="83" cy="36" r="3" fill="#201039" />
+            <circle cx="83" cy="36" r="3" fill="#101936" />
             <path
               d="m58 53 18 12 18-8"
               fill="none"
-              stroke="#9148ff"
+              stroke="#4f5cf1"
               strokeWidth="7"
               strokeLinecap="round"
             />
