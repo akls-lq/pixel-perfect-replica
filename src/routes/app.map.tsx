@@ -17,6 +17,7 @@ import {
   inMapBounds,
   mapCities,
   normalizePlace,
+  uniqueMapOffers,
   type MapBounds,
   type MapFeed,
 } from "@/lib/map-data";
@@ -29,6 +30,7 @@ function JobMap() {
   const { t } = usePreferences();
   const [feed, setFeed] = useState<MapFeed | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState("");
   const [city, setCity] = useState("");
   const [keyword, setKeyword] = useState("");
@@ -38,26 +40,56 @@ function JobMap() {
   const [selected, setSelected] = useState("");
   const [focus, setFocus] = useState<MapFocus | null>(null);
   const controller = useRef<AbortController | null>(null);
+  const appliedQuery = useRef({ q: "", commune: "" });
   const center = useRef<[number, number]>([6, 28]);
   const list = useRef<HTMLDivElement>(null);
-  const load = useCallback(async (q: string, commune = "") => {
+  const load = useCallback(async (q: string, commune = "", offset = 0) => {
+    const append = offset > 0;
     controller.current?.abort();
     const request = new AbortController();
     controller.current = request;
-    setLoading(true);
+    setLoading(!append);
+    setLoadingMore(append);
     setError("");
-    setAppliedKeyword(q);
+    if (!append) {
+      setAppliedKeyword(q);
+      appliedQuery.current = { q, commune };
+    }
     try {
-      const response = await fetch(`/api/job-map?${new URLSearchParams({ q, commune })}`, {
-        signal: request.signal,
-      });
+      const response = await fetch(
+        `/api/job-map?${new URLSearchParams({ q, commune, offset: String(offset) })}`,
+        {
+          signal: request.signal,
+        },
+      );
       if (!response.ok) throw Error("unavailable");
       const data = (await response.json()) as MapFeed;
-      if (!request.signal.aborted) setFeed(data);
+      if (
+        append &&
+        data.sources.find((source) => source.id === "france-travail")?.status !== "connected"
+      )
+        throw Error("unavailable");
+      if (!request.signal.aborted)
+        setFeed((previous) =>
+          !append || !previous
+            ? data
+            : {
+                ...data,
+                offers: uniqueMapOffers([...previous.offers, ...data.offers]),
+                franceTravailTotal: data.franceTravailTotal ?? previous.franceTravailTotal ?? null,
+                sources: previous.sources.map((source) => {
+                  const next = data.sources.find((s) => s.id === source.id);
+                  return next ? { ...next, loaded: source.loaded + next.loaded } : source;
+                }),
+              },
+        );
     } catch {
       if (!request.signal.aborted) setError("unavailable");
     } finally {
-      if (!request.signal.aborted) setLoading(false);
+      if (!request.signal.aborted) {
+        setLoading(false);
+        setLoadingMore(false);
+      }
     }
   }, []);
   useEffect(() => {
@@ -201,6 +233,31 @@ function JobMap() {
               {t("Rechercher dans cette zone", "Search this area")}
             </button>
           </div>
+          {feed?.nextFranceTravailOffset != null && (
+            <button
+              type="button"
+              disabled={loading || loadingMore}
+              onClick={() =>
+                void load(
+                  appliedQuery.current.q,
+                  appliedQuery.current.commune,
+                  feed.nextFranceTravailOffset!,
+                )
+              }
+              className="mt-4 inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-3 text-sm font-semibold text-primary-text disabled:opacity-50"
+            >
+              {loadingMore && <LoaderCircle size={16} className="animate-spin" />}
+              {t("Charger plus d’offres France Travail", "Load more France Travail jobs")}
+            </button>
+          )}
+          {feed?.franceTravailLimitReached && (
+            <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+              {t(
+                "Limite de résultats atteinte pour cette recherche. Précise le métier ou la ville pour explorer davantage d’offres.",
+                "This search has reached its result limit. Refine the role or city to explore more jobs.",
+              )}
+            </p>
+          )}
         </div>
         <section
           className="panel !p-4"
@@ -294,6 +351,18 @@ function JobMap() {
                     {t("Voir l’offre", "View job")}
                     <ExternalLink size={13} />
                   </a>
+                  {offer.partnerLinks?.map((partner) => (
+                    <a
+                      key={partner.url}
+                      href={partner.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-2 flex items-center gap-2 text-xs text-primary-text"
+                    >
+                      {t("Voir aussi sur", "Also on")} {partner.name}
+                      <ExternalLink size={12} />
+                    </a>
+                  ))}
                 </article>
               ))}
           </div>
@@ -310,7 +379,7 @@ function JobMap() {
           {t("Sources d’offres", "Job sources")}
           <ChevronDown size={16} />
         </summary>
-        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {feed?.sources.map((source) => (
             <div key={source.id} className="rounded-xl border p-3">
               <p className="text-sm font-semibold">{source.name}</p>
@@ -326,8 +395,8 @@ function JobMap() {
         </div>
         <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
           {t(
-            "France Travail nécessite un accès API. Greenhouse et Lever utilisent les sites carrières configurés. LinkedIn, Indeed, HelloWork et Glassdoor nécessitent leurs propres autorisations : ils ne sont pas encore connectés.",
-            "France Travail requires API access. Greenhouse and Lever use configured career boards. LinkedIn, Indeed, HelloWork and Glassdoor require their own permissions and are not connected yet.",
+            "France Travail nécessite un accès API. LinkedIn et HelloWork apparaissent lorsque leurs flux autorisés sont raccordés. Les liens partenaires fournis par France Travail sont conservés. Une source non connectée ne fournit aucune offre à la carte.",
+            "France Travail requires API access. LinkedIn and HelloWork appear when their licensed feeds are connected. Partner links provided by France Travail are retained. Disconnected sources do not supply any map listings.",
           )}
         </p>
       </details>

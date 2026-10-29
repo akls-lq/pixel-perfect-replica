@@ -10,11 +10,14 @@ export const Route = createFileRoute("/api/job-map")({
         const params = new URL(request.url).searchParams;
         const q = (params.get("q") ?? "").trim().slice(0, 100);
         const commune = /^\d{5}$/.test(params.get("commune") ?? "") ? params.get("commune")! : "";
-        const key = JSON.stringify([q, commune]);
+        const offset = Number(params.get("offset") ?? "0");
+        if (!Number.isInteger(offset) || offset < 0 || offset > 3000 || offset % 150 !== 0)
+          return Response.json({ error: "Invalid page" }, { status: 400 });
+        const key = JSON.stringify([q, commune, offset]);
         let entry = cache.get(key);
         if (!entry || entry.expires <= Date.now()) {
           if (cache.size >= 100) cache.delete(cache.keys().next().value!);
-          entry = { expires: Date.now() + 5 * 60_000, value: loadMapFeed({ q, commune }) };
+          entry = { expires: Date.now() + 5 * 60_000, value: loadMapFeed({ q, commune, offset }) };
           cache.set(key, entry);
         }
         try {

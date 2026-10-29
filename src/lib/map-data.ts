@@ -89,7 +89,8 @@ export function findMapCity(location: string) {
     [city.name, ...(aliases[city.name] ?? [])].some((name) => parts.includes(normalizePlace(name))),
   );
 }
-export type JobSourceId = "france-travail" | "arbeitnow" | "greenhouse" | "lever";
+export type JobSourceId =
+  "france-travail" | "linkedin" | "hellowork" | "arbeitnow" | "greenhouse" | "lever";
 export type MapOffer = {
   id: string;
   source: JobSourceId;
@@ -101,6 +102,7 @@ export type MapOffer = {
   url: string;
   contract: string;
   salary: string;
+  partnerLinks?: { name: string; url: string }[];
 };
 export type JobSourceStatus = {
   id: JobSourceId;
@@ -108,7 +110,43 @@ export type JobSourceStatus = {
   status: "connected" | "not-configured" | "unavailable";
   loaded: number;
 };
-export type MapFeed = { offers: MapOffer[]; sources: JobSourceStatus[]; fetchedAt: string };
+export type MapFeed = {
+  offers: MapOffer[];
+  sources: JobSourceStatus[];
+  fetchedAt: string;
+  nextFranceTravailOffset?: number | null;
+  franceTravailTotal?: number | null;
+  franceTravailLimitReached?: boolean;
+};
+function offerKey(offer: MapOffer) {
+  try {
+    const url = new URL(offer.url);
+    url.hash = "";
+    for (const key of [...url.searchParams.keys()]) {
+      if (
+        /^utm_/i.test(key) ||
+        ((url.hostname === "linkedin.com" || url.hostname.endsWith(".linkedin.com")) &&
+          ["trackingId", "refId", "trk"].includes(key))
+      )
+        url.searchParams.delete(key);
+    }
+    url.searchParams.sort();
+    return url.href;
+  } catch {
+    return `${offer.source}:${offer.id}`;
+  }
+}
+export function uniqueMapOffers(offers: MapOffer[]) {
+  const seenUrls = new Set<string>(),
+    seenIds = new Set<string>();
+  return offers.filter((offer) => {
+    const key = offerKey(offer);
+    if (seenUrls.has(key) || seenIds.has(offer.id)) return false;
+    seenUrls.add(key);
+    seenIds.add(offer.id);
+    return true;
+  });
+}
 export type MapBounds = { west: number; east: number; south: number; north: number };
 export function inMapBounds(coordinates: [number, number] | null, bounds: MapBounds) {
   if (!coordinates) return false;
