@@ -24,6 +24,7 @@ import { Route as AppApplicationsRouteImport } from './routes/app.applications'
 import { Route as AppCvStudioRouteImport } from './routes/app.cv-studio'
 import { Route as AppDashboardRouteImport } from './routes/app.dashboard'
 import { Route as AppMapRouteImport } from './routes/app.map'
+import { Route as AppMatchingRouteImport } from './routes/app.matching'
 import { Route as AppOffersRouteImport } from './routes/app.offers'
 import { Route as AppProfileRouteImport } from './routes/app.profile'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
@@ -105,6 +106,11 @@ const AppMapRoute = AppMapRouteImport.update({
   path: '/map',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMatchingRoute = AppMatchingRouteImport.update({
+  id: '/matching',
+  path: '/matching',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppOffersRoute = AppOffersRouteImport.update({
   id: '/offers',
   path: '/offers',
@@ -147,6 +153,7 @@ export interface FileRoutesByFullPath {
   '/app/cv-studio': typeof AppCvStudioRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/map': typeof AppMapRoute
+  '/app/matching': typeof AppMatchingRoute
   '/app/offers': typeof AppOffersRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/app/cv-studio': typeof AppCvStudioRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/map': typeof AppMapRoute
+  '/app/matching': typeof AppMatchingRoute
   '/app/offers': typeof AppOffersRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
@@ -191,6 +199,7 @@ export interface FileRoutesById {
   '/app/cv-studio': typeof AppCvStudioRoute
   '/app/dashboard': typeof AppDashboardRoute
   '/app/map': typeof AppMapRoute
+  '/app/matching': typeof AppMatchingRoute
   '/app/offers': typeof AppOffersRoute
   '/app/profile': typeof AppProfileRoute
   '/app/settings': typeof AppSettingsRoute
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/app/cv-studio'
     | '/app/dashboard'
     | '/app/map'
+    | '/app/matching'
     | '/app/offers'
     | '/app/profile'
     | '/app/settings'
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/app/cv-studio'
     | '/app/dashboard'
     | '/app/map'
+    | '/app/matching'
     | '/app/offers'
     | '/app/profile'
     | '/app/settings'
@@ -258,6 +269,7 @@ export interface FileRouteTypes {
     | '/app/cv-studio'
     | '/app/dashboard'
     | '/app/map'
+    | '/app/matching'
     | '/app/offers'
     | '/app/profile'
     | '/app/settings'
@@ -385,6 +397,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMapRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/matching': {
+      id: '/app/matching'
+      path: '/matching'
+      fullPath: '/app/matching'
+      preLoaderRoute: typeof AppMatchingRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/offers': {
       id: '/app/offers'
       path: '/offers'
@@ -443,6 +462,7 @@ interface AppRouteChildren {
   AppCvStudioRoute: typeof AppCvStudioRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppMapRoute: typeof AppMapRoute
+  AppMatchingRoute: typeof AppMatchingRoute
   AppOffersRoute: typeof AppOffersRoute
   AppProfileRoute: typeof AppProfileRoute
   AppSettingsRoute: typeof AppSettingsRoute
@@ -454,6 +474,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCvStudioRoute: AppCvStudioRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppMapRoute: AppMapRoute,
+  AppMatchingRoute: AppMatchingRoute,
   AppOffersRoute: AppOffersRoute,
   AppProfileRoute: AppProfileRoute,
   AppSettingsRoute: AppSettingsRoute,

@@ -8,6 +8,7 @@ export type State = {
   documentFiles: Record<string, { cv?: File; letter?: File }>;
   attachFile: (id: string, kind: "cv" | "letter", file: File) => void;
   applications: Application[];
+  addApplication: (application: Application) => void;
   updateApplication: (id: string, patch: Partial<Application>) => void;
   saved: string[];
   toggleSaved: (id: string) => void;

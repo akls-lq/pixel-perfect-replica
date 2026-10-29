@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   Globe2,
   Bot,
+  Heart,
   FileText,
   KanbanSquare,
   KeyRound,
@@ -26,6 +27,7 @@ import { usePreferences } from "@/components/preferences/usePreferences";
 const navigation = [
   { to: "/app/dashboard", fr: "Dashboard", en: "Dashboard", icon: LayoutDashboard },
   { to: "/app/map", fr: "Carte", en: "Map", icon: Globe2 },
+  { to: "/app/matching", fr: "Matching", en: "Matching", icon: Heart },
   { to: "/app/offers", fr: "Autopilote", en: "Autopilot", icon: Bot },
   { to: "/app/cv-studio", fr: "CV", en: "CVs", icon: FileText },
   { to: "/app/applications", fr: "Suivi", en: "Applications", icon: KanbanSquare },

@@ -1,7 +1,7 @@
 import { Context, type Resume } from "./useWorkspace";
 import { accountSamples } from "@/lib/account-data";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { initialApplications } from "@/lib/workspace-data";
+import { initialApplications, type Application } from "@/lib/workspace-data";
 export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [accounts, setAccounts] = useState(accountSamples);
   const [documentFiles, setDocumentFiles] = useState<Record<string, { cv?: File; letter?: File }>>(
@@ -40,6 +40,14 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
         attachFile: (id, kind, file) =>
           setDocumentFiles((d) => ({ ...d, [id]: { ...d[id], [kind]: file } })),
         applications,
+        addApplication: (application: Application) => {
+          setApplications((xs) => [application, ...xs]);
+          if (application.jobId) {
+            setSaved((xs) =>
+              xs.includes(application.jobId) ? xs : [...xs, application.jobId],
+            );
+          }
+        },
         updateApplication: (id, patch) =>
           setApplications((xs) => xs.map((a) => (a.id === id ? { ...a, ...patch } : a))),
         saved,
